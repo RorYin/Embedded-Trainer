@@ -1,0 +1,16 @@
+{
+  "cases": [
+    {
+      "input": "2 3\n",
+      "output": "5\n"
+    },
+    {
+      "input": "-7 4\n",
+      "output": "-3\n"
+    },
+    {
+      "input": "0 0\n",
+      "output": "0\n"
+    }
+  ]
+}

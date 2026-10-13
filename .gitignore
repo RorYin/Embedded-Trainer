@@ -1,0 +1,10 @@
+__pycache__/
+.pytest_cache/
+build/
+dist/tools/gcc/
+venv/
+.venv/
+static/vendor/monaco/
+lessons/progress.json
+dist/lessons/progress.json
+compiler/

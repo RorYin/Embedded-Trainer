@@ -1,0 +1,22 @@
+{
+  "sections": [
+    {
+      "id": "basics",
+      "name": "Basics",
+      "problems": [
+        "hello-world",
+        "sum-two-numbers"
+      ]
+    },
+    {
+      "id": "bit_manipulation",
+      "name": "Bit manipulation",
+      "problems": []
+    },
+    {
+      "id": "pointers_structures",
+      "name": "Pointers and structures",
+      "problems": []
+    }
+  ]
+}

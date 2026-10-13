@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#181818">
+    <title>Embedded C Lab</title>
+    <link rel="icon" type="image/svg+xml" href="/embedded-c-lab/static/logo.svg">
+    <link rel="stylesheet" href="/embedded-c-lab/static/styles.css?v=21">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/embedded-c-lab/" aria-label="Embedded C Lab home">
+        <img class="brand-mark" src="/embedded-c-lab/static/logo.svg" alt="">
+        <span>Embedded<span class="brand-accent">C</span>Lab</span>
+      </a>
+      <div class="topbar-note"><span class="status-dot"></span> Running on this computer</div>
+    </header>
+    <main class="workspace">
+      <aside class="sidebar" id="sidebar-pane">
+        <div class="sidebar-heading">COURSE CONTENT</div>
+        <div id="course-list" class="course-list" aria-live="polite"></div>
+        <div class="sidebar-footer">Self-paced Embedded C</div>
+      </aside>
+      <div class="splitter vertical-splitter" id="sidebar-splitter" role="separator" aria-label="Resize lesson sidebar" aria-orientation="vertical" aria-valuemin="180" aria-valuemax="480" aria-valuenow="264" tabindex="0"></div>
+      <section class="lesson" id="editor-pane">
+        <div class="editor-toolbar">
+          <div><span class="file-icon">C</span><span id="filename">solution.c</span></div>
+          <div class="editor-tools">
+            <button id="source-toggle" class="source-toggle" type="button" hidden>Load template</button>
+            <span class="editor-label" title="Programs are compiled using the C11 standard.">C11</span>
+          </div>
+        </div>
+        <div id="editor" aria-label="C code editor"></div>
+        <div class="runbar">
+          <span id="run-note">Your code is compiled locally with GCC.</span>
+          <button id="run-button" type="button" disabled><span aria-hidden="true">▶</span> Run tests</button>
+        </div>
+      </section>
+      <div class="splitter vertical-splitter" id="description-splitter" role="separator" aria-label="Resize problem description" aria-orientation="vertical" aria-valuemin="260" aria-valuemax="640" aria-valuenow="340" tabindex="0"></div>
+      <section class="description-pane" id="description-pane" aria-label="Problem description">
+        <header class="description-toolbar">
+          <div class="description-heading">
+            <div class="eyebrow" id="lesson-section">SELECT A CHALLENGE</div>
+            <h1 id="lesson-title">Welcome to Embedded C Lab</h1>
+          </div>
+          <button id="description-toggle" class="description-toggle" type="button" aria-label="Collapse problem description" aria-expanded="true" aria-controls="description-content" title="Collapse problem description">
+            <span aria-hidden="true">←</span>
+          </button>
+        </header>
+        <div class="description-content" id="description-content">
+          <div id="lesson-description" class="markdown-preview description">Choose an exercise on the left to start learning. Write a solution, run it against the included tests, and work through the sections at your own pace.</div>
+          <details id="hint-panel" class="hint-panel" hidden>
+            <summary>Need a hint?</summary>
+            <p id="lesson-hint"></p>
+          </details>
+        </div>
+      </section>
+      <div class="splitter horizontal-splitter" id="results-splitter" role="separator" aria-label="Resize test results panel" aria-orientation="horizontal" aria-valuemin="140" aria-valuemax="500" aria-valuenow="240" tabindex="0"></div>
+      <aside class="results-pane" id="results-pane">
+        <section class="results" aria-live="polite">
+          <div class="results-heading">
+            <h2>TEST RESULTS</h2>
+            <span id="result-summary">Select an exercise to begin.</span>
+          </div>
+          <div id="result-list" class="result-list"></div>
+        </section>
+      </aside>
+    </main>
+    <script src="/embedded-c-lab/static/app.js?v=21" defer></script>
+  </body>
+</html>
