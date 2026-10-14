@@ -49,7 +49,7 @@ pip install --user -r requirements.txt
 ## Step 4: Configure `wsgi.py`
 
 1. Under the **Code** section on the **Web** tab, click the link to your **WSGI configuration file** (e.g. `/var/www/<username>_pythonanywhere_com_wsgi.py`).
-2. Replace everything in that file with these 12 lines:
+2. Replace everything in that file with these simple lines:
 
 ```python
 import sys
@@ -62,14 +62,12 @@ if project_home not in sys.path:
 
 os.chdir(project_home)
 
-# Import FastAPI app and wrap with WSGI adapter for PythonAnywhere
-from a2wsgi import ASGIMiddleware
-from embedded_c_lab import app
-
-application = ASGIMiddleware(app)
+# Native synchronous WSGI handler (zero async deadlocks or uWSGI thread timeouts)
+from embedded_c_lab import wsgi_app as application
 ```
 
 *(Make sure to change `<username>` to your PythonAnywhere username, e.g. `clab`).*
+
 
 3. Click **Save** in the top right.
 

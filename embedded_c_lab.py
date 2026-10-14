@@ -332,3 +332,136 @@ def save_progress(request: ProgressRequest) -> dict[str, Any]:
 def get_progress() -> dict[str, Any]:
     progress = read_progress()
     return {"completed": progress["completed"]}
+
+
+def wsgi_app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
+    """Native synchronous WSGI application for PythonAnywhere and WSGI servers.
+
+    Runs 100% synchronously without async event loops or background threads,
+    preventing any uWSGI thread deadlocks or 502 Bad Gateway timeouts.
+    """
+    import mimetypes
+    method = environ.get("REQUEST_METHOD", "GET").upper()
+    path = environ.get("PATH_INFO", "")
+
+    if not path or path == "":
+        path = "/"
+
+    # 1. Root redirect
+    if path in ("/", "/embedded-c-lab"):
+        start_response("307 Temporary Redirect", [("Location", f"{BASE_PATH}/")])
+        return []
+
+    # 2. Main HTML page
+    if path == f"{BASE_PATH}/":
+        index_file = static_dir / "index.html"
+        if index_file.is_file():
+            data = index_file.read_bytes()
+            start_response("200 OK", [
+                ("Content-Type", "text/html; charset=utf-8"),
+                ("Content-Length", str(len(data))),
+            ])
+            return [data]
+        start_response("404 Not Found", [("Content-Type", "text/plain")])
+        return [b"Not Found"]
+
+    # 3. Static files
+    static_prefix = f"{BASE_PATH}/static/"
+    if path.startswith(static_prefix):
+        rel_path = path[len(static_prefix):]
+        try:
+            target = (static_dir / rel_path).resolve()
+            if not str(target).startswith(str(static_dir.resolve())) or not target.is_file():
+                start_response("404 Not Found", [("Content-Type", "text/plain")])
+                return [b"Static file not found"]
+            content_type, _ = mimetypes.guess_type(str(target))
+            if not content_type:
+                content_type = "application/octet-stream"
+            if target.suffix == ".wasm":
+                content_type = "application/wasm"
+            elif target.suffix == ".js":
+                content_type = "application/javascript"
+            elif target.suffix == ".css":
+                content_type = "text/css"
+            data = target.read_bytes()
+            start_response("200 OK", [
+                ("Content-Type", content_type),
+                ("Content-Length", str(len(data))),
+            ])
+            return [data]
+        except Exception:
+            start_response("404 Not Found", [("Content-Type", "text/plain")])
+            return [b"Not Found"]
+
+    # 4. API Endpoints
+    try:
+        if path == f"{API_PATH}/sections" and method == "GET":
+            res = list_sections()
+            payload = json.dumps(res).encode("utf-8")
+            start_response("200 OK", [("Content-Type", "application/json"), ("Content-Length", str(len(payload)))])
+            return [payload]
+
+        if path == f"{API_PATH}/progress":
+            if method == "GET":
+                res = get_progress()
+                payload = json.dumps(res).encode("utf-8")
+                start_response("200 OK", [("Content-Type", "application/json"), ("Content-Length", str(len(payload)))])
+                return [payload]
+            elif method == "POST":
+                length = int(environ.get("CONTENT_LENGTH", 0) or 0)
+                body = json.loads(environ["wsgi.input"].read(length).decode("utf-8")) if length > 0 else {}
+                res = save_progress(ProgressRequest(**body))
+                payload = json.dumps(res).encode("utf-8")
+                start_response("200 OK", [("Content-Type", "application/json"), ("Content-Length", str(len(payload)))])
+                return [payload]
+
+        # /sections/{sec}/problems/{prob}
+        m = re.match(rf"^{API_PATH}/sections/([^/]+)/problems/([^/]+)$", path)
+        if m and method == "GET":
+            res = get_problem(m.group(1), m.group(2))
+            payload = json.dumps(res).encode("utf-8")
+            start_response("200 OK", [("Content-Type", "application/json"), ("Content-Length", str(len(payload)))])
+            return [payload]
+
+        # /sections/{sec}/problems/{prob}/solution
+        m = re.match(rf"^{API_PATH}/sections/([^/]+)/problems/([^/]+)/solution$", path)
+        if m and method == "GET":
+            res = get_solution(m.group(1), m.group(2))
+            payload = json.dumps(res).encode("utf-8")
+            start_response("200 OK", [("Content-Type", "application/json"), ("Content-Length", str(len(payload)))])
+            return [payload]
+
+        # /sections/{sec}/problems/{prob}/save-solved
+        m = re.match(rf"^{API_PATH}/sections/([^/]+)/problems/([^/]+)/save-solved$", path)
+        if m and method == "POST":
+            length = int(environ.get("CONTENT_LENGTH", 0) or 0)
+            body = json.loads(environ["wsgi.input"].read(length).decode("utf-8")) if length > 0 else {}
+            res = save_solved(m.group(1), m.group(2), RunRequest(**body))
+            payload = json.dumps(res).encode("utf-8")
+            start_response("200 OK", [("Content-Type", "application/json"), ("Content-Length", str(len(payload)))])
+            return [payload]
+
+        # /sections/{sec}/problems/{prob}/run
+        m = re.match(rf"^{API_PATH}/sections/([^/]+)/problems/([^/]+)/run$", path)
+        if m and method == "POST":
+            length = int(environ.get("CONTENT_LENGTH", 0) or 0)
+            body = json.loads(environ["wsgi.input"].read(length).decode("utf-8")) if length > 0 else {}
+            res = run_problem(m.group(1), m.group(2), RunRequest(**body))
+            payload = json.dumps(res).encode("utf-8")
+            start_response("200 OK", [("Content-Type", "application/json"), ("Content-Length", str(len(payload)))])
+            return [payload]
+
+    except HTTPException as exc:
+        payload = json.dumps({"detail": exc.detail}).encode("utf-8")
+        status_map = {400: "400 Bad Request", 404: "404 Not Found", 500: "500 Internal Server Error"}
+        status_str = status_map.get(exc.status_code, f"{exc.status_code} Error")
+        start_response(status_str, [("Content-Type", "application/json"), ("Content-Length", str(len(payload)))])
+        return [payload]
+    except Exception as exc:
+        payload = json.dumps({"detail": str(exc)}).encode("utf-8")
+        start_response("500 Internal Server Error", [("Content-Type", "application/json"), ("Content-Length", str(len(payload)))])
+        return [payload]
+
+    start_response("404 Not Found", [("Content-Type", "application/json")])
+    return [b'{"detail":"Not Found"}']
+
