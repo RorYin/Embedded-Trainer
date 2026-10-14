@@ -1,0 +1,5 @@
+{
+  "title": "Event Dispatch Table with Function Pointers",
+  "description": "Function pointer tables decouple event producers from handlers, forming the basis of finite state machines and interrupt dispatchers in embedded systems.\n\n### Requirements:\n1. Define a dispatch table containing pairs of `{ event_id, handler_func }`.\n2. Implement `dispatch_event(uint8_t event_id, uint32_t data)`: Look up `event_id`, execute its handler, and return 0. Return -1 if event is unregistered.",
+  "hint": "A lookup table lookup is cleaner and more maintainable than large, sprawling `switch(event_id)` statements when handlers are dynamically registered or modular."
+}

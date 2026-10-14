@@ -1,0 +1,5 @@
+{
+  "title": "Reading Big-Endian and Little-Endian Multi-Byte Values",
+  "description": "Reading multi-byte integers byte-by-byte using shifts is portable, safe against unaligned memory access traps (which cause CPU HardFaults on Cortex-M0/M3), and independent of host endianness.\n\n### Tasks:\n1. `read_be16(buf)`: `(buf[0] << 8) | buf[1]`\n2. `read_be32(buf)`: `(buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3]`\n3. `read_le16(buf)`: `(buf[1] << 8) | buf[0]`\n4. `read_le32(buf)`: `(buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0]`",
+  "hint": "Never cast an unaligned byte pointer directly: `*(uint32_t*)buf` can crash the MCU with an alignment fault on unaligned addresses."
+}

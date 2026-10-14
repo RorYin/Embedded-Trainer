@@ -1,0 +1,5 @@
+{
+  "title": "Bug Hunt: Hardware Register Bit-Field Update",
+  "description": "A junior firmware engineer wrote a function to update a 4-bit field in bits [7:4] of a 16-bit register.\n\n```c\nuint16_t set_field_BUGGY(uint16_t reg, uint8_t val) {\n    uint16_t mask = 0x00F0;\n    reg = reg & mask;             // Bug 1: wipes out all bits outside [7:4]!\n    reg |= (val << 4);            // Bug 2: unmasked val clobbers bits [15:8]!\n    return reg;\n}\n```\n### Tasks:\nImplement `set_field_fixed(reg, val)` resolving both bugs:\n1. Clear only the target field using bitwise NOT `~mask`.\n2. Mask `val & 0x0F` before shifting to ensure no overflow into adjacent register fields.",
+  "hint": "Always sanitize input values when updating bitfields: `((val & field_mask) << shift_offset)`."
+}

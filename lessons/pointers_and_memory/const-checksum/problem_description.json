@@ -1,0 +1,5 @@
+{
+  "title": "Const Correctness: Buffer Summation & ROM Lookup",
+  "description": "In embedded C, `const` before pointer data (`const uint8_t *buf`) guarantees that the function will not write to or corrupt the caller's buffer.\n\n### Requirements:\n1. `sum_bytes(const uint8_t *buf, uint16_t len)`: Read and accumulate bytes using index or pointer walk.\n2. `lookup_crc(uint8_t index)`: Return lookup from `crc_table`.",
+  "hint": "Whenever a function receives a buffer that is only read, always type it as `const uint8_t *`."
+}

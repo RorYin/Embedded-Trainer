@@ -1,0 +1,5 @@
+{
+  "title": "Decoding Sensor Frame using Union",
+  "description": "Sensor telemetry commonly transmits packed measurements over I2C or SPI as 4-byte payloads.\n\n### Payload Layout (Big-Endian):\n- Bytes [0..1]: Signed 16-bit integer representing temperature in 0.1\u00b0C units.\n- Bytes [2..3]: Unsigned 16-bit integer representing relative humidity in 0.1% units.\n\n### Requirements:\nImplement `parse_sensor_word` properly handling signed two's complement decoding for negative temperatures.",
+  "hint": "Be careful when casting signed values: construct the 16-bit word unsigned first, then cast to `int16_t` so sign extension is properly preserved."
+}

@@ -1,0 +1,5 @@
+{
+  "title": "CAN Status Register Bit-Field Extraction and Insertion",
+  "description": "Hardware peripheral registers pack multiple data fields into one 32-bit register to save address space.\n\n### CAN Status Register Layout:\n- Bits [7:0]: Transmit error counter (`tx_count`)\n- Bits [15:8]: Receive error counter (`rx_count`)\n- Bits [23:16]: Error counter (`error_counter`)\n- Bits [31:24]: Reserved\n\n### Tasks:\n1. Extract the 8-bit counters using bit-shift and mask (`0xFF`).\n2. Insert a new 8-bit `count` into bits [7:0] using read-modify-write without altering bits [31:8].",
+  "hint": "To extract: `(val >> shift) & mask`.\nTo insert: `(reg & ~mask) | (new_val & mask)`."
+}

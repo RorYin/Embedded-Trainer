@@ -1,0 +1,5 @@
+{
+  "title": "GPIO Register Operations (Set, Clear, Toggle, Read)",
+  "description": "In embedded systems, hardware peripherals and GPIO pins are controlled by memory-mapped registers. You must manipulate individual bits without modifying any other bits in the register.\n\n### Requirements:\n1. `gpio_set_pin(uint16_t *reg, uint8_t pin)`: Sets bit `pin` in `*reg`.\n2. `gpio_clear_pin(uint16_t *reg, uint8_t pin)`: Clears bit `pin` in `*reg`.\n3. `gpio_toggle_pin(uint16_t *reg, uint8_t pin)`: Inverts bit `pin` in `*reg`.\n4. `gpio_read_pin(uint16_t reg, uint8_t pin)`: Returns 1 if bit `pin` is set, 0 if cleared.",
+  "hint": "Common bitwise idioms:\n- Set bit n: `*reg |= (1 << n);`\n- Clear bit n: `*reg &= ~(1 << n);`\n- Toggle bit n: `*reg ^= (1 << n);`\n- Read bit n: `(reg >> n) & 1;`"
+}

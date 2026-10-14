@@ -1,0 +1,5 @@
+{
+  "title": "Bug Hunt: Multi-Byte Sensor Packet Endianness Bugs",
+  "description": "Sensors and radio modules often mix endianness conventions across different fields in the same telemetry packet.\n\n### Packet Specification:\n- Bytes [0..1]: Sensor ID in **Little Endian**\n- Bytes [2..5]: Pressure (Pa) in **Big Endian**\n- Bytes [6..7]: Status Flags in **Big Endian**\n\n### Requirements:\nImplement `parse_sensor_packet_fixed` resolving all endianness mismatches.",
+  "hint": "Pay close attention to whether each individual field is specified as Little Endian or Big Endian in the hardware datasheet."
+}

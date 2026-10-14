@@ -118,6 +118,10 @@ h1 { margin: 0; color: #e7e7e7; font-size: clamp(16px, 1.7vw, 20px); letter-spac
 .hint-panel { flex: 0 0 auto; margin-top: 10px; padding: 8px 10px; border: 1px solid #373737; border-radius: 3px; color: #cccccc; font-size: 11px; }
 .hint-panel summary { cursor: pointer; color: #ecd391; }
 .hint-panel p { margin: 10px 0 0; line-height: 1.6; }
+.solution-panel { flex: 0 0 auto; margin-top: 10px; }
+.solution-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid #373737; border-radius: 3px; color: #e0e0e0; background: #222628; cursor: pointer; font-size: 11px; font-weight: 500; transition: background .15s, border-color .15s, color .15s; }
+.solution-btn:hover { background: #2b3135; border-color: var(--accent); color: #ffffff; }
+.solution-btn:active { background: #1a1e20; }
 .editor-toolbar { flex: 0 0 33px; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; border: 1px solid #0c0c0c; border-bottom: 0; background: var(--surface); color: var(--foreground); font-size: 11px; }
 .editor-tools { display: flex; align-items: center; gap: 12px; }
 .source-toggle { min-height: 23px; padding: 2px 8px; border: 1px solid #373737; border-radius: 2px; color: #cccccc; background: #212424; cursor: pointer; font-size: 10px; }
@@ -149,7 +153,7 @@ h1 { margin: 0; color: #e7e7e7; font-size: clamp(16px, 1.7vw, 20px); letter-spac
 .result-card.fail .result-details summary { color: #f2a7a7; }
 .result-title { font-size: 12px; font-weight: 650; }
 .result-output { margin: 7px 0 0; color: #aebbd0; white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.55 Consolas, monospace; }
-.notice { margin-top: 12px; padding: 10px; border: 1px solid #482424; border-radius: 2px; color: #f1c5a9; background: #211212; white-space: pre-wrap; font-size: 11px; }
+.notice { margin-top: 12px; padding: 10px; border: 1px solid #482424; border-radius: 2px; color: #f1c5a9; background: #211212; white-space: pre-wrap; font-family: Consolas, "Courier New", monospace; font-size: 12px; line-height: 1.5; }
 .notice:empty { display: none; }
 @media (max-width: 900px) {
   html, body { height: auto; min-height: 100%; }

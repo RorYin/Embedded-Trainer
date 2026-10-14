@@ -1,5 +1,0 @@
-{
-  "title": "Sum two numbers",
-  "description": "Read two integers from standard input and print their sum followed by a newline.\n\n## Example\n\n**Input**\n\n```text\n2 3\n```\n\n**Expected output**\n\n```text\n5\n```",
-  "hint": "Use scanf to read both integers, then print their sum with printf."
-}

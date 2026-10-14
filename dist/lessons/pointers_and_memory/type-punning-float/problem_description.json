@@ -1,0 +1,5 @@
+{
+  "title": "Safe Type Punning & Byte Copying",
+  "description": "Reinterpreting raw bytes from a communication buffer or sensor as a multi-byte integer is a classic embedded task.\n\nCasting `*(uint32_t*)byte_ptr` can violate strict aliasing and cause hard-to-debug unaligned memory access faults on ARM Cortex-M0/M3 architectures.\n\n### Safe Solutions:\n1. Implement a safe byte-by-byte `my_memcpy(dst, src, n)`.\n2. Safely unpack 4 bytes into a 32-bit word using byte copying.",
+  "hint": "Using `my_memcpy` into a destination array `uint32_t val[1]` allows the compiler to handle alignment safely without violating strict aliasing."
+}

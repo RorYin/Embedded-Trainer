@@ -1,0 +1,5 @@
+{
+  "title": "Parsing UART Packet Frame using Pointer Arithmetic",
+  "description": "Embedded protocols frequently pass raw binary byte packets over serial interfaces (UART, SPI, USB).\n\n### Packet Structure:\n- Byte 0: SOF (Start of Frame)\n- Byte 1: Command Code (cmd)\n- Bytes 2..3: 16-bit payload length (little-endian: `byte[2] | (byte[3] << 8)`)\n- Bytes 4..7: 32-bit payload word (little-endian)\n- Byte 8: Checksum\n\n### Task:\nImplement `parse_frame(const uint8_t *raw)` using pointer offsets (`*(raw + i)`).",
+  "hint": "Remember that multi-byte integers in little-endian format place the least significant byte at the lower memory address."
+}

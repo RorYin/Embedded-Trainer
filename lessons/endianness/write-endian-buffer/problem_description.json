@@ -1,0 +1,5 @@
+{
+  "title": "Serializing Multi-Byte Integers to Big/Little-Endian Buffers",
+  "description": "Writing multi-byte values into transmission buffers safely using byte shifts prevents architecture portability bugs.\n\n### Requirements:\n1. `write_be16(buf, val)`: Big-endian 16-bit.\n2. `write_be32(buf, val)`: Big-endian 32-bit.\n3. `write_le16(buf, val)`: Little-endian 16-bit.",
+  "hint": "Serializing bytes explicitly eliminates compiler padding and architecture alignment requirements."
+}

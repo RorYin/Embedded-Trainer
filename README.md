@@ -1,106 +1,127 @@
 # Embedded C Lab
 
-A local, self-paced Embedded C exercise app. A Windows executable starts a FastAPI server on `127.0.0.1:8765` and opens a Monaco-based coding page in your browser. The release consists of the small web-app executable, `tools/gcc/` with the portable compiler, and `lessons/` with editable exercises and saved progress.
+A lightweight, self-paced Embedded C trainer and interview preparation app. The server runs as a simple FastAPI web application (or standalone Windows executable) on `127.0.0.1:8765`, opening a Monaco-based coding environment in your browser.
 
-## Run from source
+**No local or backend GCC compiler is required.** Compilation and test execution run entirely inside the client's browser using a WebAssembly-based C compiler powered by [c2wasm](https://github.com/divsmith/c2wasm).
 
-1. Install Python 3.11 or newer.
-2. In PowerShell, from this folder:
+---
 
-   ```powershell
-   python -m venv .venv
-   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-   .\.venv\Scripts\python.exe scripts\download_gcc.py
-   .\.venv\Scripts\python.exe main.py
-   ```
+## Key Features & Architecture
 
-3. The app opens at <http://127.0.0.1:8765/embedded-c-lab/>.
+- **Zero Host Toolchains**: No native GCC, MinGW, Clang, or toolchain configuration needed on host or client.
+- **Ultra-Low Resource Footprint**: The backend server only serves static files and JSON endpoints. It can run on low-power servers, Raspberry Pi, or embedded gateways with minimal CPU and RAM usage.
+- **100% Client-Side WebAssembly Execution**: User C programs compile and execute within the browser's WebAssembly sandbox with WASI emulation.
+- **Instant Test Feedback**: Compilation to WASM takes tens of milliseconds directly in the browser, providing instant test feedback and detailed compilation error line numbers.
+- **Load Reference Solution**: Users can view and load the reference solution (`<problem_name>_solution.c`) at any time using the **Load Solution** button next to the Hint panel.
+- **Infinite Loop Protection**: Code runs inside a background Web Worker with an automatic execution timeout to prevent browser freezes.
+- **Offline Capable**: Bundled with Monaco editor assets and WebAssembly compiler binaries (`compiler.wasm`, `assembler.wasm`).
 
-The portable compiler installs in the project at `tools/gcc/`. Keep this folder next to the executable when sharing or running the packaged app. The app can also use GCC on `PATH` or the `EMBEDDED_C_LAB_GCC` environment variable if `tools/gcc/` is missing.
+---
 
-If you share the app without the large compiler folder, include `tools/download_gcc.bat` instead. Run it on the target Windows PC while connected to the internet; it downloads and installs this project's pinned WinLibs GCC 16.1.0 into `tools/gcc/`. Python is not required for this download. The compiler archive itself is removed after a successful install.
+## Curriculum (30 Embedded C Interview Prep Lessons)
 
-`build.bat` bundles Monaco 0.52.2 into the executable, so the packaged app's editor works offline. GCC stays outside the executable in `tools/gcc/`. For offline source development, run `.\.venv\Scripts\python.exe scripts\download_monaco.py`; source mode also falls back to loading Monaco from jsDelivr.
+The curriculum is adapted from [Amir7698/embedded-interview-prep](https://github.com/Amir7698/embedded-interview-prep) (01 C Fundamentals) and tailored for high-yield firmware and embedded systems engineering concepts:
 
-## Add an exercise
+### 1. Bit Manipulation (`bit_manipulation`)
+- **GPIO Register Operations**: Set, clear, toggle, and read pins using bitmasks (`|=`, `&= ~`, `^=`, `&`).
+- **CAN Bit Fields**: Encode and decode CAN frame Priority (3 bits) and DLC (4 bits).
+- **Endianness Byte Swap**: Implement 16-bit and 32-bit endianness byte swapping without library functions.
+- **Counting & Finding Bits**: Implement bit counting (`popcount`) and lowest set bit detection (`x & -x`).
+- **USART_CR1 Register Configuration**: Configure word length, parity, and transmitter/receiver control bits.
+- **Bitfield Bug Hunt**: Locate and fix precedence, signed bitshift, and masking errors.
 
-Create a problem folder under a section folder, add its files, then list the folder ID in `lessons/section.json`:
+### 2. Pointers and Memory (`pointers_and_memory`)
+- **Parsing UART Packet Frame**: Extract packet headers, payload length, payload data, and checksum via pointer arithmetic.
+- **Memory-Mapped Peripherals**: Simulate register polling with timeout counters and atomic register writes.
+- **Safe Type Punning & Byte Copying**: Implement byte-by-byte memory copying (`my_memcpy`) and safe word unpacking avoiding unaligned access faults.
+- **Function Pointer Dispatch Table**: Dispatch system event IDs to handler callbacks without `if`/`switch` chains.
+- **Const Checksum Calculation**: Compute 8-bit checksums over read-only flash buffers.
+- **Pointer Bug Hunt**: Detect and repair dangling pointers, memory leaks, and off-by-one pointer arithmetic.
+
+### 3. Structs, Unions and Bitfields (`structs_unions_bitfields`)
+- **Sizeof & Memory Alignment**: Understand alignment rules and struct padding on 32-bit architectures.
+- **GPIO Register Struct Layout**: Model hardware register blocks (MODER, ODR, IDR, BSRR) with struct memory offsets.
+- **Bitfield Control Register**: Map hardware status, error, and control bits using C bitfields.
+- **Sensor Word Union**: Unpack multi-byte sensor frames into temperature and humidity readings.
+- **Packed Command Frame**: Serialize fixed-layout telemetry headers and payloads.
+- **Struct Header Bug Hunt**: Fix struct packing and natural alignment traps in protocol packets.
+
+### 4. Storage Classes and Type Qualifiers (`volatile_const_static`)
+- **Volatile ISR Communication**: Safe flag communication between an interrupt service routine and main loop.
+- **Const Lookup Table**: Store mathematical lookup tables (sine/gamma) in flash ROM to conserve RAM.
+- **Static Button Debounce**: Encapsulate button debounce state across periodic polling cycles.
+- **Const Volatile Timer Register**: Model hardware read-only timer registers (`const volatile uint32_t*`).
+- **Static Module-Level PWM Driver**: Implement private module-scoped hardware variables and public driver APIs.
+- **LED Blink Bug Hunt**: Fix compiler optimization traps caused by missing `volatile` in delay loops.
+
+### 5. Endianness and Protocols (`endianness`)
+- **Endianness Detection**: Programmatically detect system byte order (Little Endian vs. Big Endian).
+- **Read Big-Endian & Little-Endian Buffers**: Parse 16-bit and 32-bit values from mixed-endian network payloads.
+- **Write Big-Endian & Little-Endian Buffers**: Serialize sensor readings into network byte order.
+- **Modbus TCP MBAP Header**: Parse and construct 7-byte Modbus TCP headers (Transaction ID, Length, Unit ID).
+- **CAN Intel Little-Endian Signal Extraction**: Extract variable bit-width signals across byte boundaries.
+- **Sensor Endianness Bug Hunt**: Fix byte-order transposition bugs in multi-byte pressure/status packets.
+
+---
+
+## Lesson Directory Structure
+
+Each problem follows a descriptive naming format:
 
 ```text
 lessons/
-  section.json
-  basics/
-    hello-world/
-      problem.c
-      problem_description.json
-      solution.c
-      input_and_output.json
-    sum-two-numbers/
-      problem.c
-      problem_description.json
-      solution.c
-      input_and_output.json       # May contain multiple cases
-      problem_solved.c           # Created after all tests pass
-  progress.json              # Created automatically when progress is saved
+  section.json               # Defines curriculum sections and ordering
+  bit_manipulation/
+    gpio-pin-operations/
+      gpio_pin_operations.c          # Starter code for the user
+      gpio_pin_operations_solution.c # Reference answer (loaded by "Load Solution" button)
+      problem_description.json       # Title, description, and hint
+      input_and_output.json          # Test cases
+      gpio_pin_operations_solved.c   # Automatically saved when tests pass
+  progress.json              # Tracks solved problem completion
 ```
 
-`section.json` format:
+---
 
-```json
-{
-  "sections": [
-    {
-      "id": "basics",
-      "name": "Basics",
-      "problems": ["hello-world"]
-    }
-  ]
-}
+## Running from Source
+
+1. Install **Python 3.11** or newer.
+2. Clone or open the repository folder:
+   ```powershell
+   python -m venv .venv
+   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+   .\.venv\Scripts\python.exe main.py
+   ```
+3. The application will launch in your default web browser at:
+   ```
+   http://127.0.0.1:8765/embedded-c-lab/
+   ```
+
+To run offline with local Monaco Editor assets:
+```powershell
+.\.venv\Scripts\python.exe scripts\download_monaco.py
 ```
 
-The `id` values are folder names and must contain only letters, numbers, underscores, or hyphens. A problem's `problem_description.json` has `title`, `description`, and `hint` strings. Its `problem.c` is the editor's starter code; `solution.c` is an optional reference answer and is never sent to the browser.
+---
 
-Test cases are fed to the compiled program on standard input and compared with standard output:
+## Running Automated Tests
 
-```json
-{
-  "cases": [
-    {
-      "input": "5\n",
-      "output": "25\n"
-    }
-  ]
-}
+To run the backend integration and verification test suite:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -v
 ```
 
-Output comparison normalizes Windows/Unix newlines and ignores leading/trailing whitespace. Add between one and 20 cases per problem. Restart the app after changing lessons. Completion status is saved in `lessons/progress.json`. When every test passes, the current editor contents are saved beside `problem.c` as `problem_solved.c`. Completed status is retained if a later run fails.
+---
 
-## Build the Windows executable
+## Building Standalone Windows Executable
 
-1. Install Python 3.11 or newer for Windows and ensure the build machine has internet access for Python packages, Monaco, and the portable WinLibs GCC download. Alternatively, download GCC separately by running `tools\download_gcc.bat`.
-2. Double-click `build.bat`. It downloads WinLibs GCC 16.1.0 into `tools/gcc/`, installs the Python requirements into `.venv`, and creates `dist/EmbeddedCLab.exe` with the matching icon.
-3. Copy or share the complete `dist/` folder. It contains the small `EmbeddedCLab.exe`, `tools/gcc/`, and `lessons/` folders.
+To compile the self-contained single-file `.exe`:
 
-The executable is a PyInstaller **one-file** build of the Python web server and its static frontend. GCC is deliberately not bundled into it; the portable toolchain is kept in `tools/gcc/` and copied beside the executable as `dist/tools/gcc/`. Exercises and progress stay in the separate `dist/lessons/` folder. If you zip the release to share it, include all three: the EXE, `tools/`, and `lessons/`.
-
-The portable compiler is the 64-bit WinLibs GCC 16.1.0 POSIX/SEH/MSVCRT release. Its upstream license and runtime files remain in `tools/gcc/`; include these files and observe the applicable GCC and MinGW-w64 redistribution terms when distributing builds.
-
-The executable icon is generated to match the code-bracket logo shown in the application header.
-
-## Interface layout
-
-The interface follows VS Code Dark+: a charcoal `#1e1e1e` editor and results area, `#252526` side panels and toolbars, navy `#094771` active lesson selection, `#007acc` focus accents, and subtle `#2b2b2b` separators. Monaco uses distinct Dark+ syntax colors for keywords, strings, numbers, identifiers, and comments. The problem description and Monaco editor are on the left and center, the lesson tree is in a right-side panel, and test results occupy a full-width bottom panel. Drag the vertical dividers to resize the description and lesson tree, and drag the horizontal divider above results to adjust the bottom panel height. On narrow screens, these panels stack vertically and their dividers adjust their heights. Sizes are remembered in the browser, and the description can be collapsed to give the editor more space.
-
-The problem description starts expanded with added spacing for comfortable reading. Use the arrow button to tuck it into a narrow side strip while solving; the arrow points toward the direction the panel will collapse or expand.
-
-Problem descriptions in `problem_description.json` are rendered as Markdown previews. Supported formatting includes headings, paragraphs, lists, fenced code blocks, inline code, bold, italic, and safe HTTP(S) links. Use fenced `text` code blocks to show example input and expected output without exposing hidden test cases.
-
-## Test-case results
-
-`input_and_output.json` can contain multiple entries in its `cases` array. The solution is compiled once per run and executed separately with every case's input. Every result has its own expandable output panel: failed tests open by default; passed tests can be expanded to compare the program's output with the expected output.
-
-The app remembers the last selected exercise in the browser and reopens it after reload. It loads `problem.c` first, even for a completed exercise. When `problem_solved.c` exists and progress marks the exercise complete, the editor toolbar offers **Load solved solution**; the same button toggles back to **Load template**.
-
-## Safety and limits
-
-This app binds only to loopback (`127.0.0.1`) and does not expose its endpoints to your network. Compiled submissions run as your Windows user, **not in a security sandbox**. A time limit stops ordinary programs that hang, but it does not prevent code from accessing or changing files, launching processes, or using system resources. Only run code you trust; use a properly isolated virtual machine for untrusted submissions. The browser-based editor does not require an installed VS Code.
+1. Run the build script:
+   ```powershell
+   .\build.bat
+   ```
+2. The standalone distributable will be generated in `dist/`:
+   - `dist\EmbeddedCLab.exe` (Single-file executable)
+   - `dist\lessons\` (Editable curriculum problems)

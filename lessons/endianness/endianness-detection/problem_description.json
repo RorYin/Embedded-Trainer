@@ -1,0 +1,5 @@
+{
+  "title": "Runtime Endianness Detection and Byte Swapping",
+  "description": "Embedded developers must frequently deal with mixed-endian architectures (e.g. little-endian Cortex-M core communicating with big-endian network equipment).\n\n### Requirements:\n1. `system_is_little_endian()`: Detect memory layout.\n2. `bswap16(uint16_t x)`: Swap high and low bytes.\n3. `bswap32(uint32_t x)`: Reverse all 4 bytes.",
+  "hint": "For byte swapping without compiler intrinsics (`__builtin_bswap32`), use bit-shifts and masking."
+}

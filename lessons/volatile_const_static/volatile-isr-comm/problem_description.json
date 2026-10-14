@@ -1,0 +1,5 @@
+{
+  "title": "Volatile Flag Synchronization between ISR and Main",
+  "description": "Any variable modified in an Interrupt Service Routine (ISR) and checked in the main application loop MUST be declared `volatile`.\n\nThe `volatile` type qualifier instructs the compiler that the variable's value can change asynchronously outside the current compiler control flow. This prevents the compiler from optimizing out repetitive reads into a CPU register.\n\n### Requirements:\nImplement `process_rx_data(uint8_t *out_byte)`: If `g_rx_ready` is 1, copy `g_rx_byte` to `*out_byte`, reset `g_rx_ready = 0`, and return 1. Otherwise return 0.",
+  "hint": "Always clear the ready flag immediately after copying the data to avoid double-processing."
+}

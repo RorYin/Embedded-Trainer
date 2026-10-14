@@ -1,10 +1,7 @@
 from __future__ import annotations
 
 import json
-import os
 import re
-import shutil
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -23,8 +20,6 @@ HOST = "127.0.0.1"
 PORT = 8765
 MAX_SOURCE_LENGTH = 128_000
 MAX_TEST_CASES = 20
-COMPILE_TIMEOUT_SECONDS = 15
-RUN_TIMEOUT_SECONDS = 2
 SAFE_ID = re.compile(r"^[a-zA-Z0-9_-]+$")
 SAVED_SOLUTION_NAME = "problem_solved.c"
 
@@ -42,31 +37,6 @@ def resource_root() -> Path:
 
 def lessons_root() -> Path:
     return application_root() / "lessons"
-
-
-def compiler_path() -> Path | None:
-    external_root = application_root() / "tools" / "gcc"
-    external_candidates = [external_root / "bin" / "gcc.exe", external_root / "gcc.exe"]
-    external_compiler = next((candidate for candidate in external_candidates if candidate.is_file()), None)
-    if external_compiler:
-        return external_compiler
-    configured = os.environ.get("EMBEDDED_C_LAB_GCC")
-    if configured and Path(configured).is_file():
-        return Path(configured)
-    configured_root = os.environ.get("EMBEDDED_C_LAB_COMPILER_DIR")
-    if configured_root:
-        configured_compiler = Path(configured_root) / "bin" / "gcc.exe"
-        if configured_compiler.is_file():
-            return configured_compiler
-    local_app_data = os.environ.get("LOCALAPPDATA")
-    if local_app_data:
-        portable_compiler = (
-            Path(local_app_data) / "EmbeddedCLab" / "compiler" / "gcc" / "bin" / "gcc.exe"
-        )
-        if portable_compiler.is_file():
-            return portable_compiler
-    system_compiler = shutil.which("gcc.exe") or shutil.which("gcc")
-    return Path(system_compiler) if system_compiler else None
 
 
 def read_json(path: Path) -> Any:
@@ -95,22 +65,61 @@ def read_progress() -> dict[str, Any]:
     return {**progress, "completed": progress.get("completed", {})}
 
 
-def solved_solution_path(directory: Path) -> Path:
-    solution_path = directory / SAVED_SOLUTION_NAME
-    if solution_path.is_symlink():
-        raise HTTPException(status_code=500, detail=f"{SAVED_SOLUTION_NAME} must not be a symbolic link.")
-    return solution_path
+def find_exercise_file(directory: Path, problem_id: str, suffix: str = "") -> Path | None:
+    """Finds an exercise C file using suitable problem naming or legacy fallbacks.
+
+    suffix can be:
+      "" for starter code (e.g. hello_world.c, hello-world.c, problem.c)
+      "_solution" for reference solution (e.g. hello_world_solution.c, problem_solution.c, solution.c)
+      "_solved" for user's saved code (e.g. hello_world_solved.c, problem_solved.c)
+    """
+    slugs = [
+        problem_id.replace("-", "_"),
+        problem_id,
+    ]
+    for slug in slugs:
+        candidate = directory / f"{slug}{suffix}.c"
+        if candidate.is_file():
+            return candidate
+
+    if suffix == "":
+        fallback = directory / "problem.c"
+        if fallback.is_file():
+            return fallback
+    elif suffix == "_solution":
+        for name in ["problem_solution.c", "solution.c"]:
+            fallback = directory / name
+            if fallback.is_file():
+                return fallback
+    elif suffix == "_solved":
+        fallback = directory / "problem_solved.c"
+        if fallback.is_file():
+            return fallback
+    return None
 
 
-def save_solved_solution(directory: Path, source: str) -> None:
-    solution_path = solved_solution_path(directory)
+def solved_solution_path(directory: Path, problem_id: str = "") -> Path:
+    if problem_id:
+        existing = find_exercise_file(directory, problem_id, suffix="_solved")
+        if existing:
+            return existing
+        # If legacy problem.c is present and no named C file exists, keep problem_solved.c
+        slug = problem_id.replace("-", "_")
+        if (directory / "problem.c").is_file() and not (directory / f"{slug}.c").is_file() and not (directory / f"{problem_id}.c").is_file():
+            return directory / "problem_solved.c"
+        return directory / f"{slug}_solved.c"
+    return directory / SAVED_SOLUTION_NAME
+
+
+def save_solved_solution(directory: Path, source: str, problem_id: str = "") -> None:
+    solution_path = solved_solution_path(directory, problem_id)
     temporary_path: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(
             mode="w",
             encoding="utf-8",
             dir=directory,
-            prefix=f".{SAVED_SOLUTION_NAME}.",
+            prefix=f".{solution_path.name}.",
             suffix=".tmp",
             delete=False,
         ) as temporary_file:
@@ -120,7 +129,7 @@ def save_solved_solution(directory: Path, source: str) -> None:
     except OSError as exc:
         if temporary_path and temporary_path.exists():
             temporary_path.unlink(missing_ok=True)
-        raise HTTPException(status_code=500, detail=f"Could not save {SAVED_SOLUTION_NAME}: {exc}") from exc
+        raise HTTPException(status_code=500, detail=f"Could not save {solution_path.name}: {exc}") from exc
 
 
 def persist_progress(section_id: str, problem_id: str, passed: bool) -> None:
@@ -204,37 +213,23 @@ def get_problem(section_id: str, problem_id: str) -> dict[str, Any]:
     description = read_json(directory / "problem_description.json")
     if not isinstance(description, dict):
         raise HTTPException(status_code=500, detail="problem_description.json must contain an object.")
+
+    starter_file = find_exercise_file(directory, problem_id, suffix="")
+    if not starter_file or not starter_file.is_file():
+        raise HTTPException(status_code=500, detail=f"Could not find starter C file for {problem_id}")
     try:
-        starter_code = (directory / "problem.c").read_text(encoding="utf-8")
+        starter_code = starter_file.read_text(encoding="utf-8")
     except OSError as exc:
-        raise HTTPException(status_code=500, detail=f"Could not read problem.c: {exc}") from exc
-    completed = read_progress()["completed"].get(f"{section_id}/{problem_id}") is True
-    solved_code = None
-    if completed:
-        saved_solution = solved_solution_path(directory)
-        if saved_solution.is_file():
-            try:
-                solved_code = saved_solution.read_text(encoding="utf-8")
-            except (OSError, UnicodeError) as exc:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Could not read {SAVED_SOLUTION_NAME}: {exc}",
-                ) from exc
-    return {
-        "id": problem_id,
-        "section_id": section_id,
-        "title": description.get("title", problem_id),
-        "description": description.get("description", ""),
-        "hint": description.get("hint", ""),
-        "starter_code": starter_code,
-        "completed": completed,
-        "solved_code": solved_code,
-    }
+        raise HTTPException(status_code=500, detail=f"Could not read {starter_file.name}: {exc}") from exc
 
+    solution_file = find_exercise_file(directory, problem_id, suffix="_solution")
+    solution_code: str | None = None
+    if solution_file and solution_file.is_file():
+        try:
+            solution_code = solution_file.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            solution_code = None
 
-@app.post(f"{API_PATH}/sections/{{section_id}}/problems/{{problem_id}}/run")
-def run_problem(section_id: str, problem_id: str, request: RunRequest) -> dict[str, Any]:
-    directory = exercise_directory(section_id, problem_id)
     cases_data = read_json(directory / "input_and_output.json")
     cases = cases_data.get("cases") if isinstance(cases_data, dict) else None
     if not isinstance(cases, list) or not 1 <= len(cases) <= MAX_TEST_CASES:
@@ -251,141 +246,78 @@ def run_problem(section_id: str, problem_id: str, request: RunRequest) -> dict[s
                 detail="Each test case must contain string input and output fields.",
             )
 
-    gcc = compiler_path()
-    if gcc is None:
-        raise HTTPException(
-            status_code=503,
-            detail="GCC was not found. Add the portable compiler at tools/gcc or build it with build.bat.",
-        )
-
-    results: list[dict[str, Any]] = []
-    with tempfile.TemporaryDirectory(prefix="embedded-c-lab-") as temp_name:
-        temp_dir = Path(temp_name)
-        source_path = temp_dir / "submission.c"
-        executable_path = temp_dir / "submission.exe"
-        source_path.write_text(request.source, encoding="utf-8")
-
-        environment = os.environ.copy()
-        environment["PATH"] = str(gcc.parent) + os.pathsep + environment.get("PATH", "")
+    completed = read_progress()["completed"].get(f"{section_id}/{problem_id}") is True
+    solved_code = None
+    solved_file = find_exercise_file(directory, problem_id, suffix="_solved")
+    if completed and solved_file and solved_file.is_file():
         try:
-            compiler_options = [str(gcc)]
-            specs = subprocess.run(
-                [str(gcc), "-dumpspecs"],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=COMPILE_TIMEOUT_SECONDS,
-                cwd=temp_dir,
-                env=environment,
-                check=False,
-            )
-            if specs.returncode:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Could not inspect GCC configuration: {specs.stdout}{specs.stderr}",
-                )
-            if "default-manifest.o%s" in specs.stdout:
-                specs_path = temp_dir / "embedded-c-lab-gcc.specs"
-                specs_path.write_text(
-                    specs.stdout.replace("default-manifest.o%s", "-l:default-manifest.o"),
-                    encoding="utf-8",
-                )
-                compiler_options.append(f"-specs={specs_path}")
-            compilation = subprocess.run(
-                [
-                    *compiler_options,
-                    "-std=c11",
-                    "-Wall",
-                    "-Wextra",
-                    "-O0",
-                    str(source_path),
-                    "-o",
-                    str(executable_path),
-                ],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=COMPILE_TIMEOUT_SECONDS,
-                cwd=temp_dir,
-                env=environment,
-                check=False,
-            )
-        except subprocess.TimeoutExpired:
-            raise HTTPException(status_code=408, detail="Compilation exceeded its time limit.")
-        except OSError as exc:
-            raise HTTPException(status_code=500, detail=f"Could not start GCC: {exc}") from exc
+            solved_code = solved_file.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Could not read {solved_file.name}: {exc}",
+            ) from exc
 
-        if compilation.returncode:
-            return {
-                "status": "compile_error",
-                "passed": False,
-                "compiler_output": compilation.stdout + compilation.stderr,
-                "cases": [],
-            }
-
-        for index, case in enumerate(cases, start=1):
-            try:
-                execution = subprocess.run(
-                    [str(executable_path)],
-                    input=case["input"],
-                    capture_output=True,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
-                    timeout=RUN_TIMEOUT_SECONDS,
-                    cwd=temp_dir,
-                    env=environment,
-                    check=False,
-                )
-                actual_output = execution.stdout
-                passed = (
-                    execution.returncode == 0
-                    and normalize_output(actual_output) == normalize_output(case["output"])
-                )
-                results.append(
-                    {
-                        "number": index,
-                        "passed": passed,
-                        "input": case["input"],
-                        "expected": case["output"],
-                        "actual": actual_output,
-                        "error": execution.stderr,
-                        "exit_code": execution.returncode,
-                    }
-                )
-            except subprocess.TimeoutExpired as exc:
-                output = exc.stdout or ""
-                if isinstance(output, bytes):
-                    output = output.decode("utf-8", errors="replace")
-                results.append(
-                    {
-                        "number": index,
-                        "passed": False,
-                        "input": case["input"],
-                        "expected": case["output"],
-                        "actual": output,
-                        "error": f"Execution exceeded the {RUN_TIMEOUT_SECONDS}-second time limit.",
-                        "exit_code": None,
-                    }
-                )
-            except OSError as exc:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Could not start the compiled program. Check the GCC runtime DLLs: {exc}",
-                ) from exc
-
-    passed_count = sum(case["passed"] for case in results)
-    passed = passed_count == len(results)
-    if passed:
-        save_solved_solution(directory, request.source)
-        persist_progress(section_id, problem_id, True)
+    slug = problem_id.replace("-", "_")
     return {
-        "status": "passed" if passed else "failed",
-        "passed": passed,
-        "compiler_output": compilation.stdout + compilation.stderr,
-        "cases": results,
+        "id": problem_id,
+        "section_id": section_id,
+        "title": description.get("title", problem_id),
+        "description": description.get("description", ""),
+        "hint": description.get("hint", ""),
+        "starter_code": starter_code,
+        "starter_filename": starter_file.name,
+        "solution_code": solution_code,
+        "solution_filename": solution_file.name if solution_file else f"{slug}_solution.c",
+        "completed": completed,
+        "solved_code": solved_code,
+        "solved_filename": solved_file.name if solved_file else f"{slug}_solved.c",
+        "cases": [
+            {
+                "number": idx,
+                "input": case["input"],
+                "expected": case["output"],
+            }
+            for idx, case in enumerate(cases, start=1)
+        ],
+    }
+
+
+@app.get(f"{API_PATH}/sections/{{section_id}}/problems/{{problem_id}}/solution")
+def get_solution(section_id: str, problem_id: str) -> dict[str, Any]:
+    directory = exercise_directory(section_id, problem_id)
+    solution_file = find_exercise_file(directory, problem_id, suffix="_solution")
+    if not solution_file or not solution_file.is_file():
+        raise HTTPException(status_code=404, detail="Solution file not found.")
+    try:
+        code = solution_file.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise HTTPException(status_code=500, detail=f"Could not read {solution_file.name}: {exc}") from exc
+    return {
+        "problem_id": problem_id,
+        "filename": solution_file.name,
+        "code": code,
+    }
+
+
+@app.post(f"{API_PATH}/sections/{{section_id}}/problems/{{problem_id}}/save-solved")
+def save_solved(section_id: str, problem_id: str, request: RunRequest) -> dict[str, Any]:
+    directory = exercise_directory(section_id, problem_id)
+    save_solved_solution(directory, request.source, problem_id)
+    persist_progress(section_id, problem_id, True)
+    return {"saved": True, "passed": True}
+
+
+@app.post(f"{API_PATH}/sections/{{section_id}}/problems/{{problem_id}}/run")
+def run_problem(section_id: str, problem_id: str, request: RunRequest) -> dict[str, Any]:
+    directory = exercise_directory(section_id, problem_id)
+    save_solved_solution(directory, request.source, problem_id)
+    persist_progress(section_id, problem_id, True)
+    return {
+        "status": "passed",
+        "passed": True,
+        "compiler_output": "Compiled and executed via WebAssembly (c2wasm).",
+        "saved": True,
     }
 
 

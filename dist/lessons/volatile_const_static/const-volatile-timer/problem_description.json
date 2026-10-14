@@ -1,0 +1,5 @@
+{
+  "title": "Const Volatile Pointer for Read-Only Hardware Timer",
+  "description": "One of the most famous embedded C interview questions is: *Can a pointer be declared both const and volatile at the same time?*\n\n**Yes!** A read-only hardware status register or system timer register:\n- It is `const` because firmware code must not write to it (read-only hardware).\n- It is `volatile` because hardware alters it externally, so reads cannot be optimized away.\n\n### Requirements:\n1. `read_timer_count()`: Read from `TIMER_REG`.\n2. `has_timer_expired()`: Unsigned subtraction `(current - start_tick) >= duration_ticks` which cleanly handles 32-bit integer overflow rollover.",
+  "hint": "Unsigned arithmetic is defined modulo 2^N in C, meaning `current_tick - start_tick` correctly calculates elapsed time even across timer rollover."
+}

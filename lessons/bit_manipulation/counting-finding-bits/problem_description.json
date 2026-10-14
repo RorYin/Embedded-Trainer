@@ -1,0 +1,5 @@
+{
+  "title": "Bit Counting (Popcount), Highest Set Bit, and Bit Reversal",
+  "description": "Bit counting algorithms are used in error correction (parity checks), scheduler priority resolution, and embedded signal processing.\n\n### Requirements:\n1. `count_set_bits(uint32_t x)`: Count set bits using Brian Kernighan's trick (`x &= x - 1`).\n2. `find_highest_set_bit(uint32_t x)`: Find index of highest set bit (0-31), or -1 if x is 0.\n3. `reverse_bits(uint32_t x)`: Mirror all 32 bits.",
+  "hint": "Brian Kernighan's algorithm runs in O(k) loops where k is the number of 1s in the integer. In each step, `x &= (x - 1)` clears the least significant 1-bit."
+}

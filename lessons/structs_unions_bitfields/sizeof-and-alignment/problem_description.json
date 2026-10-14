@@ -1,0 +1,5 @@
+{
+  "title": "Struct Memory Alignment & Sizeof Calculations",
+  "description": "Understanding memory layout, structure padding, and member ordering is an essential skill in embedded systems where RAM is constrained and hardware registers align to fixed boundaries.\n\n### Requirements:\nImplement `get_s1_size()`, `get_s2_size()`, `get_s3_size()`, and `get_s4_size()` returning the `sizeof()` each struct.",
+  "hint": "Use the `sizeof` operator to calculate total memory size including any alignment padding."
+}

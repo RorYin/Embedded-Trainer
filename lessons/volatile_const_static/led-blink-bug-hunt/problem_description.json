@@ -1,0 +1,5 @@
+{
+  "title": "Bug Hunt: Storage Class Pitfalls in Non-Blocking LED Blinker",
+  "description": "Embedded systems must never use blocking `delay_ms()` loops because they freeze communication stacks and user interface updates.\n\nInstead, non-blocking state machines poll `current_tick`.\n\n### Bugs Fixed:\n1. `static uint32_t last_toggle` preserves the timestamp of the last toggle.\n2. `static uint8_t led_state` persists pin state across loop invocations.\n3. `(current_tick - last_toggle) >= interval_ticks` cleanly handles unsigned 32-bit tick wrap.",
+  "hint": "Non-blocking timers are the core foundation of cooperative super-loops in real-time embedded systems."
+}

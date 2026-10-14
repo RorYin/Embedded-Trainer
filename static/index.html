@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#181818">
     <title>Embedded C Lab</title>
     <link rel="icon" type="image/svg+xml" href="/embedded-c-lab/static/logo.svg">
-    <link rel="stylesheet" href="/embedded-c-lab/static/styles.css?v=21">
+    <link rel="stylesheet" href="/embedded-c-lab/static/styles.css?v=22">
   </head>
   <body>
     <header class="topbar">
@@ -14,7 +14,7 @@
         <img class="brand-mark" src="/embedded-c-lab/static/logo.svg" alt="">
         <span>Embedded<span class="brand-accent">C</span>Lab</span>
       </a>
-      <div class="topbar-note"><span class="status-dot"></span> Running on this computer</div>
+      <div class="topbar-note"><span class="status-dot"></span> In-browser WebAssembly C Compiler</div>
     </header>
     <main class="workspace">
       <aside class="sidebar" id="sidebar-pane">
@@ -25,15 +25,15 @@
       <div class="splitter vertical-splitter" id="sidebar-splitter" role="separator" aria-label="Resize lesson sidebar" aria-orientation="vertical" aria-valuemin="180" aria-valuemax="480" aria-valuenow="264" tabindex="0"></div>
       <section class="lesson" id="editor-pane">
         <div class="editor-toolbar">
-          <div><span class="file-icon">C</span><span id="filename">solution.c</span></div>
+          <div><span class="file-icon">C</span><span id="filename">main.c</span></div>
           <div class="editor-tools">
             <button id="source-toggle" class="source-toggle" type="button" hidden>Load template</button>
-            <span class="editor-label" title="Programs are compiled using the C11 standard.">C11</span>
+            <span class="editor-label" title="Programs are compiled in-browser using c2wasm (WebAssembly).">C (WASM)</span>
           </div>
         </div>
         <div id="editor" aria-label="C code editor"></div>
         <div class="runbar">
-          <span id="run-note">Your code is compiled locally with GCC.</span>
+          <span id="run-note">Compiled and executed entirely in your browser via WebAssembly.</span>
           <button id="run-button" type="button" disabled><span aria-hidden="true">▶</span> Run tests</button>
         </div>
       </section>
@@ -54,6 +54,11 @@
             <summary>Need a hint?</summary>
             <p id="lesson-hint"></p>
           </details>
+          <div id="solution-panel" class="solution-panel" hidden>
+            <button id="load-solution-btn" class="solution-btn" type="button" title="Load the official problem solution into the editor">
+              <span aria-hidden="true">💡</span> Load Problem Solution
+            </button>
+          </div>
         </div>
       </section>
       <div class="splitter horizontal-splitter" id="results-splitter" role="separator" aria-label="Resize test results panel" aria-orientation="horizontal" aria-valuemin="140" aria-valuemax="500" aria-valuenow="240" tabindex="0"></div>
@@ -67,6 +72,8 @@
         </section>
       </aside>
     </main>
-    <script src="/embedded-c-lab/static/app.js?v=21" defer></script>
+    <script src="/embedded-c-lab/static/vendor/c2wasm/wasi-harness.js?v=1"></script>
+    <script src="/embedded-c-lab/static/vendor/c2wasm/compiler-api.js?v=1"></script>
+    <script src="/embedded-c-lab/static/app.js?v=22" defer></script>
   </body>
 </html>

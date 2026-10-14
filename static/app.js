@@ -150,6 +150,151 @@ function showNotice(message) {
   results.append(notice);
 }
 
+function normalizeOutput(value) {
+  return String(value || "").replace(/\r\n?/g, "\n").trim();
+}
+
+function formatCompilerError(rawError, source) {
+  const text = String(rawError || "").trim();
+  const match = text.match(/(?:[a-zA-Z0-9_\-\.]+:)?(\d+):(\d+):\s*(error:\s*.+)/);
+  if (!match) return text;
+  const lineNum = parseInt(match[1], 10);
+  const colNum = parseInt(match[2], 10);
+  const errDesc = match[3];
+
+  const lines = String(source || "").split("\n");
+  const sourceLine = lines[lineNum - 1] ?? "";
+  const pointer = " ".repeat(Math.max(0, colNum - 1)) + "^";
+
+  const activeFilename = document.getElementById("filename")?.textContent || "solution.c";
+  return `${activeFilename}:${lineNum}:${colNum}: ${errDesc}\n    ${sourceLine}\n    ${pointer}`;
+}
+
+function parseCompilerError(msg) {
+  const match = String(msg || "").match(/(?:[a-zA-Z0-9_\-\.]+:)?(\d+):(\d+):\s*(error:\s*.+)/);
+  if (!match) return null;
+  return {
+    line: parseInt(match[1], 10),
+    col: parseInt(match[2], 10),
+    message: match[3],
+  };
+}
+
+function setEditorErrorMarker(errorInfo) {
+  if (!editor || !window.monaco || !errorInfo) return;
+  const model = editor.getModel();
+  if (!model) return;
+  const lineLength = typeof model.getLineLength === "function" ? model.getLineLength(errorInfo.line) : errorInfo.col + 5;
+  window.monaco.editor.setModelMarkers(model, "c2wasm", [
+    {
+      startLineNumber: errorInfo.line,
+      startColumn: errorInfo.col,
+      endLineNumber: errorInfo.line,
+      endColumn: Math.max(errorInfo.col + 1, lineLength + 1),
+      message: errorInfo.message,
+      severity: window.monaco.MarkerSeverity.Error,
+    },
+  ]);
+  if (typeof editor.revealLineInCenter === "function") {
+    editor.revealLineInCenter(errorInfo.line);
+  }
+}
+
+function clearEditorMarkers() {
+  if (!editor || !window.monaco) return;
+  const model = editor.getModel();
+  if (model) window.monaco.editor.setModelMarkers(model, "c2wasm", []);
+}
+
+function runCaseWithTimeout(wasmBytes, input, timeoutMs = 2000) {
+  return new Promise((resolve) => {
+    let worker = null;
+    let timer = null;
+    let resolved = false;
+
+    function finish(res) {
+      if (resolved) return;
+      resolved = true;
+      if (timer) clearTimeout(timer);
+      if (worker) {
+        worker.terminate();
+        worker = null;
+      }
+      resolve(res);
+    }
+
+    try {
+      worker = new Worker("/embedded-c-lab/static/vendor/c2wasm/wasm-worker.js");
+      worker.onmessage = function (event) {
+        const data = event.data || {};
+        if (data.type === "done") {
+          finish({
+            stdout: data.stdout || "",
+            stderr: data.stderr || "",
+            exitCode: data.exitCode,
+            error: "",
+          });
+        } else if (data.type === "error") {
+          finish({
+            stdout: data.stdout || "",
+            stderr: data.stderr || "",
+            exitCode: 1,
+            error: data.message || "Runtime error",
+          });
+        }
+      };
+      worker.onerror = function (err) {
+        finish({
+          stdout: "",
+          stderr: "",
+          exitCode: 1,
+          error: err && err.message ? err.message : "Worker execution error",
+        });
+      };
+      timer = setTimeout(() => {
+        finish({
+          stdout: "",
+          stderr: "",
+          exitCode: null,
+          error: `Execution exceeded the ${timeoutMs / 1000}-second time limit.`,
+        });
+      }, timeoutMs);
+
+      worker.postMessage({ type: "run", wasmBytes: wasmBytes, input: input || "" });
+    } catch (workerErr) {
+      try {
+        const inputBytes = new TextEncoder().encode(input || "");
+        const ctx = createWasiHarness({
+          mode: "buffer",
+          inputBytes: inputBytes,
+          args: ["program"],
+        });
+        const mod = new WebAssembly.Module(wasmBytes);
+        const inst = new WebAssembly.Instance(mod, ctx.imports);
+        ctx.setMemory(inst.exports.memory);
+        try {
+          inst.exports._start();
+        } catch (e) {
+          if (!ctx.isExit(e)) throw e;
+        }
+        resolve({
+          stdout: ctx.stdout,
+          stderr: ctx.stderr,
+          exitCode: ctx.exitCode !== null ? ctx.exitCode : 0,
+          error: "",
+        });
+      } catch (runErr) {
+        resolve({
+          stdout: "",
+          stderr: "",
+          exitCode: 1,
+          error: runErr && runErr.message ? runErr.message : String(runErr),
+        });
+      }
+    }
+  });
+}
+
 function formatErrorDetail(detail) {
   if (typeof detail === "string") return detail;
   if (Array.isArray(detail)) {
@@ -392,34 +537,61 @@ function makeResultCard(testCase) {
 
 function updateSourceControls() {
   const toggle = document.getElementById("source-toggle");
-  const savedSourceAvailable = typeof currentExercise?.solvedCode === "string";
-  toggle.hidden = !savedSourceAvailable;
-  if (!currentExercise) return;
-  const showingSolved = currentExercise.activeSource === "solved";
-  document.getElementById("filename").textContent = showingSolved
-    ? "problem_solved.c"
-    : "problem.c";
-  if (savedSourceAvailable) {
-    toggle.textContent = showingSolved ? "Load template" : "Load solved solution";
-    toggle.title = showingSolved ? "Load the original problem template" : "Load your saved solution";
+  if (!currentExercise) {
+    if (toggle) toggle.hidden = true;
+    return;
+  }
+  const filenameEl = document.getElementById("filename");
+  const hasSolved = typeof currentExercise.solvedCode === "string";
+
+  if (currentExercise.activeSource === "solution") {
+    filenameEl.textContent = currentExercise.solutionFilename;
+    toggle.hidden = false;
+    toggle.textContent = "Load template";
+    toggle.title = "Return to the original problem template";
+  } else if (currentExercise.activeSource === "solved") {
+    filenameEl.textContent = currentExercise.solvedFilename;
+    toggle.hidden = false;
+    toggle.textContent = "Load template";
+    toggle.title = "Return to the original problem template";
+  } else {
+    // "template"
+    filenameEl.textContent = currentExercise.starterFilename;
+    toggle.hidden = !hasSolved;
+    if (hasSolved) {
+      toggle.textContent = "Load my solved code";
+      toggle.title = "Load your previously saved solution";
+    }
   }
 }
 
 function loadExerciseSource(source) {
   if (!currentExercise) return;
   currentExercise.activeSource = source;
-  editor.setValue(source === "solved" ? currentExercise.solvedCode : currentExercise.starterCode);
+  if (source === "solution") {
+    editor.setValue(currentExercise.solutionCode || "");
+  } else if (source === "solved") {
+    editor.setValue(currentExercise.solvedCode || "");
+  } else {
+    editor.setValue(currentExercise.starterCode || "");
+  }
   updateSourceControls();
 }
 
 async function selectProblem(section, problemId, button) {
   try {
     const problem = await api(`/sections/${encodeURIComponent(section.id)}/problems/${encodeURIComponent(problemId)}`);
+    const defaultSlug = problemId.replace(/-/g, "_");
     currentExercise = {
       sectionId: section.id,
       problemId,
       starterCode: problem.starter_code,
+      starterFilename: problem.starter_filename || `${defaultSlug}.c`,
+      solutionCode: typeof problem.solution_code === "string" ? problem.solution_code : null,
+      solutionFilename: problem.solution_filename || `${defaultSlug}_solution.c`,
       solvedCode: typeof problem.solved_code === "string" ? problem.solved_code : null,
+      solvedFilename: problem.solved_filename || `${defaultSlug}_solved.c`,
+      cases: Array.isArray(problem.cases) ? problem.cases : [],
       activeSource: "template",
     };
     localStorage.setItem("embedded-c-lab.last-problem", `${section.id}/${problemId}`);
@@ -437,6 +609,12 @@ async function selectProblem(section, problemId, button) {
     renderMarkdown(document.getElementById("lesson-description"), problem.description);
     document.getElementById("lesson-hint").textContent = problem.hint;
     document.getElementById("hint-panel").hidden = !problem.hint;
+
+    const solutionPanel = document.getElementById("solution-panel");
+    if (solutionPanel) {
+      solutionPanel.hidden = !currentExercise.solutionCode;
+    }
+
     document.getElementById("result-summary").textContent = "Run your solution to check it.";
     document.getElementById("result-list").replaceChildren();
     loadExerciseSource(currentExercise.activeSource);
@@ -507,11 +685,18 @@ async function loadCourse() {
 }
 
 document.getElementById("source-toggle").addEventListener("click", () => {
-  if (!currentExercise || typeof currentExercise.solvedCode !== "string") return;
-  const nextSource = currentExercise.activeSource === "solved" ? "template" : "solved";
-  const activeCode = currentExercise.activeSource === "solved"
-    ? currentExercise.solvedCode
-    : currentExercise.starterCode;
+  if (!currentExercise) return;
+  let nextSource = "template";
+  if (currentExercise.activeSource === "template") {
+    if (typeof currentExercise.solvedCode === "string") {
+      nextSource = "solved";
+    } else {
+      return;
+    }
+  }
+  const activeCode = currentExercise.activeSource === "solution"
+    ? currentExercise.solutionCode
+    : (currentExercise.activeSource === "solved" ? currentExercise.solvedCode : currentExercise.starterCode);
   if (
     editor.getValue() !== activeCode &&
     !window.confirm("Switching files will replace your current editor contents. Continue?")
@@ -519,62 +704,118 @@ document.getElementById("source-toggle").addEventListener("click", () => {
   loadExerciseSource(nextSource);
 });
 
+const loadSolutionBtn = document.getElementById("load-solution-btn");
+if (loadSolutionBtn) {
+  loadSolutionBtn.addEventListener("click", () => {
+    if (!currentExercise || !currentExercise.solutionCode) return;
+    if (currentExercise.activeSource === "solution") {
+      showNotice("The official problem solution is already loaded.");
+      return;
+    }
+    const activeCode = currentExercise.activeSource === "solved"
+      ? currentExercise.solvedCode
+      : currentExercise.starterCode;
+    if (
+      editor.getValue() !== activeCode &&
+      !window.confirm("Loading the problem solution will replace your current editor contents. Continue?")
+    ) return;
+    loadExerciseSource("solution");
+    showNotice(`Loaded problem solution (${currentExercise.solutionFilename}).`);
+  });
+}
+
 runButton.addEventListener("click", async () => {
   if (!currentExercise || !editor) return;
   const exercise = currentExercise;
   runButton.disabled = true;
   runButton.textContent = "Compiling...";
-  document.getElementById("result-summary").textContent = "Compiling and running test cases...";
+  document.getElementById("result-summary").textContent = "Compiling with WebAssembly (c2wasm)...";
+  clearEditorMarkers();
   const submittedSource = editor.getValue();
+  const resultList = document.getElementById("result-list");
+  resultList.replaceChildren();
+
+  let wasmBytes;
   try {
-    const result = await api(
-      `/sections/${encodeURIComponent(exercise.sectionId)}/problems/${encodeURIComponent(exercise.problemId)}/run`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source: submittedSource }),
-      },
-    );
-    const resultList = document.getElementById("result-list");
-    resultList.replaceChildren();
-    if (result.status === "compile_error") {
-      showNotice(result.compiler_output || "GCC could not compile this program.");
-      document.getElementById("result-summary").textContent = "Compilation failed.";
-    } else {
-      for (const testCase of result.cases) resultList.append(makeResultCard(testCase));
-      if (result.compiler_output.trim()) {
-        const output = document.createElement("pre");
-        output.className = "notice";
-        output.textContent = result.compiler_output;
-        resultList.append(output);
-      }
-      document.getElementById("result-summary").textContent = result.passed
-        ? `All ${result.cases.length} tests passed.`
-        : `${result.cases.filter((item) => item.passed).length} of ${result.cases.length} tests passed.`;
-      if (result.passed) {
-        progress[`${exercise.sectionId}/${exercise.problemId}`] = true;
-        exercise.solvedCode = submittedSource;
-        exercise.activeSource = exercise === currentExercise ? "solved" : exercise.activeSource;
-        if (currentExercise === exercise) updateSourceControls();
-        document.querySelectorAll(".problem-link").forEach((button) => {
-          if (button.dataset.problemKey === `${exercise.sectionId}/${exercise.problemId}`) {
-            button.classList.add("completed");
-          }
-        });
-      }
-    }
-  } catch (error) {
-    showNotice(error.message || error);
-    document.getElementById("result-summary").textContent = "Request failed. See the details below.";
-  } finally {
-    runButton.disabled = !currentExercise;
+    wasmBytes = await CompilerAPI.compileBinary(submittedSource);
+  } catch (compileErr) {
+    const rawErrMsg = compileErr.message || String(compileErr);
+    const formattedError = formatCompilerError(rawErrMsg, submittedSource);
+    showNotice(formattedError);
+    document.getElementById("result-summary").textContent = "Compilation failed.";
+    const errorInfo = parseCompilerError(rawErrMsg);
+    if (errorInfo) setEditorErrorMarker(errorInfo);
+    runButton.disabled = false;
     runButton.innerHTML = '<span aria-hidden="true">▶</span> Run tests';
+    return;
   }
+
+  runButton.textContent = "Running tests...";
+  document.getElementById("result-summary").textContent = "Running test cases in WebAssembly...";
+
+  const cases = exercise.cases && exercise.cases.length > 0
+    ? exercise.cases
+    : [{ number: 1, input: "", expected: "" }];
+
+  const results = [];
+  for (const testCase of cases) {
+    const exec = await runCaseWithTimeout(wasmBytes, testCase.input, 2000);
+    const passed = (exec.exitCode === 0 && !exec.error) &&
+      (normalizeOutput(exec.stdout) === normalizeOutput(testCase.expected));
+    const testResult = {
+      number: testCase.number,
+      passed: passed,
+      input: testCase.input,
+      expected: testCase.expected,
+      actual: exec.stdout || "",
+      error: exec.error || exec.stderr || "",
+      exit_code: exec.exitCode,
+    };
+    results.push(testResult);
+    resultList.append(makeResultCard(testResult));
+  }
+
+  const passedCount = results.filter((item) => item.passed).length;
+  const allPassed = passedCount === results.length;
+  document.getElementById("result-summary").textContent = allPassed
+    ? `All ${results.length} tests passed.`
+    : `${passedCount} of ${results.length} tests passed.`;
+
+  if (allPassed) {
+    try {
+      await api(
+        `/sections/${encodeURIComponent(exercise.sectionId)}/problems/${encodeURIComponent(exercise.problemId)}/save-solved`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ source: submittedSource }),
+        }
+      );
+    } catch (saveErr) {
+      console.warn("Could not save progress to server:", saveErr);
+    }
+
+    progress[`${exercise.sectionId}/${exercise.problemId}`] = true;
+    exercise.solvedCode = submittedSource;
+    exercise.activeSource = exercise === currentExercise ? "solved" : exercise.activeSource;
+    if (currentExercise === exercise) updateSourceControls();
+    document.querySelectorAll(".problem-link").forEach((button) => {
+      if (button.dataset.problemKey === `${exercise.sectionId}/${exercise.problemId}`) {
+        button.classList.add("completed");
+      }
+    });
+  }
+
+  runButton.disabled = false;
+  runButton.innerHTML = '<span aria-hidden="true">▶</span> Run tests';
 });
 
 (async function start() {
   try {
     setupSplitters();
+    if (typeof CompilerAPI !== "undefined" && CompilerAPI.init) {
+      CompilerAPI.init().catch((err) => console.warn("CompilerAPI preload deferred:", err));
+    }
     await loadMonaco();
     await loadCourse();
   } catch (error) {

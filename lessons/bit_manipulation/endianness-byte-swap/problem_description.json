@@ -1,0 +1,5 @@
+{
+  "title": "Endianness Detection and Fast Byte Swapping",
+  "description": "Network protocols (such as TCP/IP and Modbus) are big-endian, while standard MCUs (like ARM Cortex-M) are little-endian. Firmware must detect endianness and swap multi-byte integers.\n\n### Requirements:\n1. `is_little_endian()`: Inspects memory representation of a 16-bit value `0x0001`. If byte 0 is `1`, system is little-endian.\n2. `swap16(uint16_t x)`: Swaps the two bytes: `0xAABB` -> `0xBBAA`.\n3. `swap32(uint32_t x)`: Reverses all 4 bytes: `0xAABBCCDD` -> `0xDDCCBBAA`.",
+  "hint": "For `swap16`: bit-shift `x >> 8` and `x << 8`, then mask with `0xFFFF` to prevent 32-bit integer promotion overflows."
+}

@@ -1,0 +1,5 @@
+{
+  "title": "Bug Hunt: Pointer Pitfalls in Array Max Search",
+  "description": "Embedded systems must never crash or cause hard faults due to invalid pointer dereferencing.\n\n### Common Bugs in Pointer Traversals:\n1. Missing `NULL` check before dereferencing `arr[0]`.\n2. Missing bounds check for `count == 0`.\n3. Storing pointers instead of values when the buffer might be volatile or reassigned.\n\n### Requirements:\nImplement `find_max_fixed(const uint8_t *arr, uint8_t count)` returning `0` if `arr == NULL` or `count == 0`, and the max byte otherwise.",
+  "hint": "Always validate incoming pointer parameters against `NULL` before dereferencing."
+}

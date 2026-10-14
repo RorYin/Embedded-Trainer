@@ -1,0 +1,5 @@
+{
+  "title": "Command Frame Serialization & Checksum Validation",
+  "description": "Serial communication links require strict framing (delimiters + command + payload + error checking) to reject electromagnetic noise and malformed frames.\n\n### 6-Byte Frame Specification:\n- Byte 0: `FRAME_SOF` (`0x55`)\n- Byte 1: Command ID\n- Bytes 2..3: 16-bit big-endian payload\n- Byte 4: Checksum (`byte[0] ^ byte[1] ^ byte[2] ^ byte[3]`)\n- Byte 5: `FRAME_EOF` (`0xAA`)\n\n### Requirements:\n1. `build_command_frame`: Constructs the frame.\n2. `validate_command_frame`: Verifies SOF, EOF, and checksum.",
+  "hint": "A simple XOR checksum detects all single-bit transmission errors."
+}

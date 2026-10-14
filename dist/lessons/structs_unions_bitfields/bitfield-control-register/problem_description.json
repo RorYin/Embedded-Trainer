@@ -1,0 +1,5 @@
+{
+  "title": "Hardware Control Register Decoding & Bit Manipulation",
+  "description": "Hardware registers combine enable flags, interrupt masks, and multi-bit configuration settings.\n\n### Control Register Layout:\n- Bit 0: `PE` (Peripheral Enable)\n- Bit 1: `TXIE` (Transmit Interrupt Enable)\n- Bit 2: `RXIE` (Receive Interrupt Enable)\n- Bits [9:8]: `SPEED` (0=Low, 1=Medium, 2=High, 3=Very High)\n- All other bits: 0",
+  "hint": "Bit shifts and masks (`(field & mask) << shift`) avoid implementation-defined compiler struct bitfield layouts while remaining portable across ARM, RISC-V, and x86."
+}

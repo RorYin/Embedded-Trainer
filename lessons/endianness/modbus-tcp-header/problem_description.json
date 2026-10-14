@@ -1,0 +1,5 @@
+{
+  "title": "Modbus TCP MBAP Header Parsing & Construction",
+  "description": "Modbus TCP is the global industrial automation standard protocol across PLCs, SCADA, and IoT gateways.\n\n### MBAP Header Specification:\n- Bytes [0..1]: Transaction ID (16-bit BE)\n- Bytes [2..3]: Protocol ID (16-bit BE, must be 0 for Modbus)\n- Bytes [4..5]: Length (16-bit BE: 1 unit_id byte + PDU length)\n- Byte 6: Unit ID\n\n### Requirements:\nImplement `parse_modbus_tcp_header` and `build_modbus_tcp_header`.",
+  "hint": "Validate that `frame_len >= 7` and `protocol_id == 0` before accepting the frame."
+}

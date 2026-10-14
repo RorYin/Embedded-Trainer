@@ -1,0 +1,5 @@
+{
+  "title": "Memory-Mapped Peripheral Register Polling & Access",
+  "description": "Peripheral drivers interact with hardware using memory-mapped register pointers. Pointers must access volatile registers so compiler optimizations do not elide hardware polling reads.\n\n### Requirements:\n1. `periph_init(FakePeripheral *p)`: Enables peripheral by setting `PERIPH_CR_EN` in `p->CR`.\n2. `periph_wait_ready(FakePeripheral *p, uint32_t timeout_loops)`: Polls `p->SR & PERIPH_SR_BUSY` until 0 or timeout exhausted.\n3. `periph_write(FakePeripheral *p, uint32_t data)`: Writes `data` to `p->DR`.",
+  "hint": "Hardware polling loops always need a timeout counter to prevent firmwares from hanging forever if hardware fails."
+}

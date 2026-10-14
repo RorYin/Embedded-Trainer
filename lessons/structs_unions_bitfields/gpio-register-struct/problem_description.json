@@ -1,0 +1,5 @@
+{
+  "title": "STM32-Style GPIO Register Map Struct",
+  "description": "C struct overlays map directly onto memory-mapped hardware peripheral addresses.\n\n### Modern MCU GPIO Architecture (STM32):\n- `MODER`: 2 bits per pin for input, output, alternate function, or analog.\n- `BSRR`: Bit Set/Reset Register. Writing 1 to bits [15:0] sets the pin; writing 1 to bits [31:16] clears it. This allows atomic single-instruction pin toggles without race conditions.\n- `IDR`: Input Data Register containing live pin voltage levels.",
+  "hint": "BSRR avoids the classical read-modify-write hazard (`ODR |= (1 << pin)`) where an ISR preemption between read and write would lose changes."
+}

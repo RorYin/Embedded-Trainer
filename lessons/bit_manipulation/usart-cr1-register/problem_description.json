@@ -1,0 +1,5 @@
+{
+  "title": "USART Packed Control Register Configuration",
+  "description": "Configure a microcontroller USART control register (CR1) by setting and clearing designated bit fields.\n\n### CR1 Bitfield Definitions:\n- Bit 13: `UE` (USART Enable)\n- Bit 12: `M` (Word length: 0=8 bits, 1=9 bits)\n- Bit 10: `PCE` (Parity Control Enable: 0=disabled, 1=enabled)\n- Bit 9: `PS` (Parity Selection: 0=Even, 1=Odd)\n\n### Modes:\n1. `8N1`: M=0, PCE=0, PS=0\n2. `8E1`: M=0, PCE=1, PS=0\n3. `9O1`: M=1, PCE=1, PS=1",
+  "hint": "Always clear previous mode bits with `reg &= ~(M | PCE | PS)` before applying new settings so residual configuration bits don't corrupt the mode."
+}

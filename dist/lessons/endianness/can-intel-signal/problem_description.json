@@ -1,0 +1,5 @@
+{
+  "title": "CAN Intel Signal Extraction Across Byte Boundaries",
+  "description": "In automotive CAN bus networking, signals defined by DBC files frequently straddle byte boundaries in little-endian (Intel) format.\n\n### Requirements:\nImplement `can_extract_intel_signal16(payload, start_bit, bit_len)` by reading consecutive bytes into a sliding window, shifting right by `start_bit % 8`, and masking with `(1 << bit_len) - 1`.",
+  "hint": "Forming a 32-bit little-endian window from `payload[byte_idx]` and `payload[byte_idx + 1]` allows extracting any boundary-spanning signal in a single shift and mask."
+}

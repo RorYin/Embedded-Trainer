@@ -1,0 +1,5 @@
+{
+  "title": "Static Variables for State Retention in Button Debouncing",
+  "description": "Local variables declared with `static` retain their values between function calls throughout program execution.\n\nThis encapsulates driver state locally inside the function instead of exposing messy global variables across the codebase.\n\n### Requirements:\nImplement a 3-sample integrator debouncer: When `raw_sample` matches `last_sample` for 3 consecutive calls, update `debounced_state`.",
+  "hint": "`static` inside a function gives variable permanent lifetime while restricting its scope to that function."
+}

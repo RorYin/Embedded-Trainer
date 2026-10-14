@@ -1,0 +1,5 @@
+{
+  "title": "Module-Private Encapsulation using File-Scope Static",
+  "description": "In large firmware projects without object-oriented class syntax, file-scope `static` variables and functions provide information hiding and modularity.\n\nAny file-scope symbol declared `static` has internal linkage and is completely inaccessible outside this file.\n\n### Requirements:\n1. `pwm_set_duty(duty_pct, period_ticks)`: Configures internal driver state.\n2. `pwm_get_output(current_tick)`: Calculates output level based on modulo period phase.",
+  "hint": "Internal linkage prevents symbol collisions between multiple driver modules across the build."
+}

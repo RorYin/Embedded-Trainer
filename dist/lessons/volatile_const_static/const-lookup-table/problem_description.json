@@ -1,0 +1,5 @@
+{
+  "title": "Const Lookup Tables in ROM/Flash",
+  "description": "Lookup tables (LUTs) replace expensive runtime floating-point or trigonometric calculations on low-power microcontrollers without an FPU.\n\nBy qualifying tables with `static const`, the C compiler emits data into the read-only `.rodata` section stored in Flash ROM, preserving SRAM.\n\n### Requirements:\n1. Clamp `pwm_percent` to a maximum of 100.\n2. Round to the nearest 10% interval: `index = (pwm_percent + 5) / 10`.\n3. Return the mapped DAC byte.",
+  "hint": "Integer division with addition: `(val + half_divisor) / divisor` provides standard nearest-integer rounding without floating point."
+}

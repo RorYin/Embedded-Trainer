@@ -1,22 +1,64 @@
 {
   "sections": [
     {
-      "id": "basics",
-      "name": "Basics",
+      "id": "bit_manipulation",
+      "name": "Bit Manipulation",
       "problems": [
-        "hello-world",
-        "sum-two-numbers"
+        "gpio-pin-operations",
+        "can-bit-fields",
+        "endianness-byte-swap",
+        "counting-finding-bits",
+        "usart-cr1-register",
+        "bitfield-bug-hunt"
       ]
     },
     {
-      "id": "bit_manipulation",
-      "name": "Bit manipulation",
-      "problems": []
+      "id": "pointers_and_memory",
+      "name": "Pointers and Memory",
+      "problems": [
+        "parse-uart-frame",
+        "memory-mapped-peripherals",
+        "type-punning-float",
+        "function-pointer-dispatch",
+        "const-checksum",
+        "pointer-bug-hunt"
+      ]
     },
     {
-      "id": "pointers_structures",
-      "name": "Pointers and structures",
-      "problems": []
+      "id": "structs_unions_bitfields",
+      "name": "Structs, Unions and Bitfields",
+      "problems": [
+        "sizeof-and-alignment",
+        "gpio-register-struct",
+        "bitfield-control-register",
+        "sensor-word-union",
+        "packed-command-frame",
+        "struct-header-bug-hunt"
+      ]
+    },
+    {
+      "id": "volatile_const_static",
+      "name": "Storage Classes and Type Qualifiers",
+      "problems": [
+        "volatile-isr-comm",
+        "const-lookup-table",
+        "static-button-debounce",
+        "const-volatile-timer",
+        "static-module-pwm",
+        "led-blink-bug-hunt"
+      ]
+    },
+    {
+      "id": "endianness",
+      "name": "Endianness and Protocols",
+      "problems": [
+        "endianness-detection",
+        "read-endian-buffer",
+        "write-endian-buffer",
+        "modbus-tcp-header",
+        "can-intel-signal",
+        "sensor-endian-bug-hunt"
+      ]
     }
   ]
 }
