@@ -31,7 +31,7 @@ button:focus-visible, summary:focus-visible { outline: 1px solid var(--accent); 
   height: 42px; display: flex; align-items: center; justify-content: space-between;
   padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--title-status);
 }
-.brand { color: var(--foreground); text-decoration: none; display: flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 600; }
+.brand { color: var(--foreground); text-decoration: none; display: flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 600; letter-spacing: 1.5px; }
 .brand-mark { display: block; width: 22px; height: 22px; }
 .brand-accent { color: var(--accent); }
 .topbar-note { display: flex; align-items: center; gap: 7px; color: #9d9d9d; font-size: 11px; }

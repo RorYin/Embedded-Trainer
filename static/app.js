@@ -635,7 +635,7 @@ async function loadCourse() {
     const toggle = document.createElement("button");
     toggle.type = "button";
     toggle.className = "section-toggle";
-    toggle.setAttribute("aria-expanded", section.problems.length > 0 ? "true" : "false");
+    toggle.setAttribute("aria-expanded", "false");
     const problemListId = `section-problems-${section.id}`;
     toggle.setAttribute("aria-controls", problemListId);
     const chevron = document.createElement("span");
@@ -650,7 +650,7 @@ async function loadCourse() {
     problems.className = "section-problems";
     problems.setAttribute("role", "group");
     problems.setAttribute("aria-label", section.name);
-    problems.hidden = section.problems.length === 0;
+    problems.hidden = true;
     toggle.addEventListener("click", () => {
       const expanded = toggle.getAttribute("aria-expanded") === "true";
       toggle.setAttribute("aria-expanded", String(!expanded));
@@ -680,8 +680,6 @@ async function loadCourse() {
   if (!course.sections.some((section) => section.problems.length)) {
     document.getElementById("lesson-description").textContent = "No exercises were found. Add a problem folder and list its ID in exercises/section.json.";
   }
-  const lastProblem = problemButtons.get(localStorage.getItem("embedded-c-lab.last-problem"));
-  if (lastProblem) await selectProblem(lastProblem.section, lastProblem.problemId, lastProblem.button);
 }
 
 document.getElementById("source-toggle").addEventListener("click", () => {
