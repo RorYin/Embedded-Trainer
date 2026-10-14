@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#181818">
     <title>Embedded C Lab</title>
     <link rel="icon" type="image/svg+xml" href="/embedded-c-lab/static/logo.svg">
-    <link rel="stylesheet" href="/embedded-c-lab/static/styles.css?v=23">
+    <link rel="stylesheet" href="/embedded-c-lab/static/styles.css?v=24">
   </head>
   <body>
     <header class="topbar">
@@ -14,7 +14,14 @@
         <img class="brand-mark" src="/embedded-c-lab/static/logo.svg" alt="">
         <span>Embedded<span class="brand-accent">C</span>Lab</span>
       </a>
-      <div class="topbar-note"><span class="status-dot"></span> In-browser WebAssembly C Compiler</div>
+      <div class="topbar-actions">
+        <label class="disk-save-toggle" title="Save solution as a .c file on server when tests pass (off by default to save storage)">
+          <input type="checkbox" id="save-disk-toggle">
+          <span class="switch-track"><span class="switch-thumb"></span></span>
+          <span class="switch-label">Save .c to disk</span>
+        </label>
+        <div class="topbar-note"><span class="status-dot"></span> In-browser WebAssembly C Compiler</div>
+      </div>
     </header>
     <main class="workspace">
       <aside class="sidebar" id="sidebar-pane">
@@ -28,6 +35,13 @@
           <div><span class="file-icon">C</span><span id="filename">main.c</span></div>
           <div class="editor-tools">
             <button id="source-toggle" class="source-toggle" type="button" hidden>Load template</button>
+            <button id="download-btn" class="editor-icon-btn" type="button" title="Save / download current C file" aria-label="Save / download current C file">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </button>
             <span class="editor-label" title="Programs are compiled in-browser using c2wasm (WebAssembly).">C (WASM)</span>
           </div>
         </div>
@@ -49,7 +63,7 @@
           </button>
         </header>
         <div class="description-content" id="description-content">
-          <div id="lesson-description" class="markdown-preview description">Choose an exercise on the left to start learning. Write a solution, run it against the included tests, and work through the sections at your own pace.</div>
+          <div id="lesson-description" class="markdown-preview description">Choose an exercise on the right to start learning. Write a solution, run it against the included tests, and work through the sections at your own pace.</div>
           <details id="hint-panel" class="hint-panel" hidden>
             <summary>Need a hint?</summary>
             <p id="lesson-hint"></p>
@@ -74,6 +88,6 @@
     </main>
     <script src="/embedded-c-lab/static/vendor/c2wasm/wasi-harness.js?v=1"></script>
     <script src="/embedded-c-lab/static/vendor/c2wasm/compiler-api.js?v=1"></script>
-    <script src="/embedded-c-lab/static/app.js?v=23" defer></script>
+    <script src="/embedded-c-lab/static/app.js?v=24" defer></script>
   </body>
 </html>

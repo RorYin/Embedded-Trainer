@@ -722,6 +722,36 @@ if (loadSolutionBtn) {
   });
 }
 
+const downloadBtn = document.getElementById("download-btn");
+if (downloadBtn) {
+  downloadBtn.addEventListener("click", () => {
+    if (!editor) return;
+    const content = editor.getValue();
+    const filenameEl = document.getElementById("filename");
+    let filename = (filenameEl && filenameEl.textContent.trim()) || "solution.c";
+    if (!filename.endsWith(".c") && !filename.endsWith(".h")) {
+      filename += ".c";
+    }
+    const blob = new Blob([content], { type: "text/x-c;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+}
+
+const saveDiskToggle = document.getElementById("save-disk-toggle");
+if (saveDiskToggle) {
+  saveDiskToggle.checked = localStorage.getItem("embedded-c-lab.save-disk") === "true";
+  saveDiskToggle.addEventListener("change", () => {
+    localStorage.setItem("embedded-c-lab.save-disk", String(saveDiskToggle.checked));
+  });
+}
+
 runButton.addEventListener("click", async () => {
   if (!currentExercise || !editor) return;
   const exercise = currentExercise;
@@ -780,13 +810,14 @@ runButton.addEventListener("click", async () => {
     : `${passedCount} of ${results.length} tests passed.`;
 
   if (allPassed) {
+    const saveToDisk = saveDiskToggle ? saveDiskToggle.checked === true : false;
     try {
       await api(
         `/sections/${encodeURIComponent(exercise.sectionId)}/problems/${encodeURIComponent(exercise.problemId)}/save-solved`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ source: submittedSource }),
+          body: JSON.stringify({ source: submittedSource, save_file: saveToDisk }),
         }
       );
     } catch (saveErr) {

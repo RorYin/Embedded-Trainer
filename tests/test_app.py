@@ -60,7 +60,7 @@ def test_save_solved_persists_solution_and_progress(monkeypatch, tmp_path) -> No
     source = '#include <stdio.h>\nint main(void) { printf("All tests passed!\\n"); return 0; }'
     save_resp = client.post(
         "/embedded-c-lab/api/v1/sections/bit_manipulation/problems/gpio-pin-operations/save-solved",
-        json={"source": source},
+        json={"source": source, "save_file": True},
     )
     assert save_resp.status_code == 200
     assert save_resp.json()["saved"] is True
@@ -71,6 +71,34 @@ def test_save_solved_persists_solution_and_progress(monkeypatch, tmp_path) -> No
     saved_problem = client.get("/embedded-c-lab/api/v1/sections/bit_manipulation/problems/gpio-pin-operations")
     assert saved_problem.json()["completed"] is True
     assert saved_problem.json()["solved_code"] == source
+
+
+def test_save_solved_default_does_not_create_file(monkeypatch, tmp_path) -> None:
+    lessons = tmp_path / "lessons"
+    exercise = lessons / "bit_manipulation" / "gpio-pin-operations"
+    exercise.mkdir(parents=True)
+    (exercise / "gpio_pin_operations.c").write_text("int main(void) { return 0; }\n", encoding="utf-8")
+    (exercise / "problem_description.json").write_text(
+        json.dumps({"title": "GPIO", "description": "Operations.", "hint": ""}),
+        encoding="utf-8",
+    )
+    (exercise / "input_and_output.json").write_text(
+        json.dumps({"cases": [{"input": "", "output": "All tests passed!\n"}]}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(embedded_c_lab, "lessons_root", lambda: lessons)
+
+    source = '#include <stdio.h>\nint main(void) { printf("All tests passed!\\n"); return 0; }'
+    save_resp = client.post(
+        "/embedded-c-lab/api/v1/sections/bit_manipulation/problems/gpio-pin-operations/save-solved",
+        json={"source": source},
+    )
+    assert save_resp.status_code == 200
+    assert save_resp.json()["saved"] is False
+    assert not (exercise / "gpio_pin_operations_solved.c").exists()
+    assert client.get("/embedded-c-lab/api/v1/progress").json()["completed"] == {
+        "bit_manipulation/gpio-pin-operations": True
+    }
 
 
 def test_run_endpoint_saves_solution(monkeypatch, tmp_path) -> None:
@@ -97,7 +125,7 @@ def test_run_endpoint_saves_solution(monkeypatch, tmp_path) -> None:
     source = '#include <stdio.h>\nint main(void) { return 0; }'
     response = client.post(
         "/embedded-c-lab/api/v1/sections/bit_manipulation/problems/gpio-pin-operations/run",
-        json={"source": source},
+        json={"source": source, "save_file": True},
     )
     assert response.status_code == 200
     result = response.json()
@@ -182,7 +210,7 @@ def test_save_solved_with_suitable_name(monkeypatch, tmp_path) -> None:
     source = 'int main(void) { return 42; }'
     save_resp = client.post(
         "/embedded-c-lab/api/v1/sections/bit_manipulation/problems/my-test/save-solved",
-        json={"source": source},
+        json={"source": source, "save_file": True},
     )
     assert save_resp.status_code == 200
     assert (exercise / "my_test_solved.c").read_text(encoding="utf-8") == source

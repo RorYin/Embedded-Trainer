@@ -153,6 +153,7 @@ def normalize_output(value: str) -> str:
 
 class RunRequest(BaseModel):
     source: Annotated[str, Field(max_length=MAX_SOURCE_LENGTH)]
+    save_file: bool = False
 
 
 class ProgressRequest(BaseModel):
@@ -302,22 +303,24 @@ def get_solution(section_id: str, problem_id: str) -> dict[str, Any]:
 
 @app.post(f"{API_PATH}/sections/{{section_id}}/problems/{{problem_id}}/save-solved")
 def save_solved(section_id: str, problem_id: str, request: RunRequest) -> dict[str, Any]:
-    directory = exercise_directory(section_id, problem_id)
-    save_solved_solution(directory, request.source, problem_id)
+    if request.save_file:
+        directory = exercise_directory(section_id, problem_id)
+        save_solved_solution(directory, request.source, problem_id)
     persist_progress(section_id, problem_id, True)
-    return {"saved": True, "passed": True}
+    return {"saved": bool(request.save_file), "passed": True}
 
 
 @app.post(f"{API_PATH}/sections/{{section_id}}/problems/{{problem_id}}/run")
 def run_problem(section_id: str, problem_id: str, request: RunRequest) -> dict[str, Any]:
-    directory = exercise_directory(section_id, problem_id)
-    save_solved_solution(directory, request.source, problem_id)
+    if request.save_file:
+        directory = exercise_directory(section_id, problem_id)
+        save_solved_solution(directory, request.source, problem_id)
     persist_progress(section_id, problem_id, True)
     return {
         "status": "passed",
         "passed": True,
         "compiler_output": "Compiled and executed via WebAssembly (c2wasm).",
-        "saved": True,
+        "saved": bool(request.save_file),
     }
 
 
