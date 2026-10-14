@@ -1,3 +1,5 @@
 fastapi>=0.115.12,<1
 uvicorn[standard]>=0.34.2,<1
 pyinstaller>=6.13,<7
+a2wsgi>=1.10.0,<2
+

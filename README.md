@@ -125,3 +125,10 @@ To compile the self-contained single-file `.exe`:
 2. The standalone distributable will be generated in `dist/`:
    - `dist\EmbeddedCLab.exe` (Single-file executable)
    - `dist\lessons\` (Editable curriculum problems)
+
+---
+
+## Deploy to Cloud (PythonAnywhere)
+
+For step-by-step instructions on deploying Embedded C Lab online for free to **PythonAnywhere**, see [DEPLOY_PYTHONANYWHERE.md](DEPLOY_PYTHONANYWHERE.md).
+
