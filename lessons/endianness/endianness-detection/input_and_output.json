@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "le: 1\n"
+    },
+    {
+      "input": "2",
+      "output": "swap: 0x3412\n"
+    },
+    {
+      "input": "3",
+      "output": "swap: 0xff00\n"
+    },
+    {
+      "input": "4",
+      "output": "swap: 0x78563412\n"
+    },
+    {
+      "input": "5",
+      "output": "swap: 0xddccbbaa\n"
     }
   ]
 }

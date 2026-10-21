@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "reg: 0x105, speed: 1\n"
+    },
+    {
+      "input": "2",
+      "output": "reg: 0x0, speed: 0\n"
+    },
+    {
+      "input": "3",
+      "output": "reg: 0x307, speed: 3\n"
+    },
+    {
+      "input": "4",
+      "output": "reg: 0x202, speed: 2\n"
+    },
+    {
+      "input": "5",
+      "output": "speed: 2\n"
     }
   ]
 }

@@ -1,8 +1,36 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1: count_set_bits(0xB5)\n",
+      "output": "5\n"
+    },
+    {
+      "input": "2: count_set_bits(0)\n",
+      "output": "0\n"
+    },
+    {
+      "input": "3: count_set_bits(0xFFFFFFFF)\n",
+      "output": "32\n"
+    },
+    {
+      "input": "4: find_highest_set_bit(0x0A)\n",
+      "output": "3\n"
+    },
+    {
+      "input": "5: find_highest_set_bit(0)\n",
+      "output": "-1\n"
+    },
+    {
+      "input": "6: find_highest_set_bit(0x80000000)\n",
+      "output": "31\n"
+    },
+    {
+      "input": "7: reverse_bits(0x80000000)\n",
+      "output": "0x1\n"
+    },
+    {
+      "input": "8: reverse_bits(0x00000001)\n",
+      "output": "0x80000000\n"
     }
   ]
 }

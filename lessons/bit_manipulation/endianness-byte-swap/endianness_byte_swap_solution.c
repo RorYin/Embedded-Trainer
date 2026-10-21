@@ -21,13 +21,3 @@ uint32_t swap32(uint32_t x)
            (((x >> 16) & 0xFF) <<  8) |
            (((x >> 24) & 0xFF) <<  0);
 }
-
-int main(void)
-{
-    if (is_little_endian() != 1) { printf("Failed: is_little_endian\n"); return 1; }
-    if (swap16(0xAABB) != 0xBBAA) { printf("Failed: swap16\n"); return 2; }
-    if (swap32(0xAABBCCDD) != 0xDDCCBBAA) { printf("Failed: swap32\n"); return 3; }
-
-    printf("All tests passed!\n");
-    return 0;
-}

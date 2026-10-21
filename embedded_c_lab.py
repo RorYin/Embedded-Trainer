@@ -91,6 +91,11 @@ def find_exercise_file(directory: Path, problem_id: str, suffix: str = "") -> Pa
             fallback = directory / name
             if fallback.is_file():
                 return fallback
+    elif suffix == "_tester":
+        for name in ["tester.c", "test.c", "problem_tester.c"]:
+            fallback = directory / name
+            if fallback.is_file():
+                return fallback
     elif suffix == "_solved":
         fallback = directory / "problem_solved.c"
         if fallback.is_file():
@@ -231,6 +236,14 @@ def get_problem(section_id: str, problem_id: str) -> dict[str, Any]:
         except (OSError, UnicodeError):
             solution_code = None
 
+    tester_file = find_exercise_file(directory, problem_id, suffix="_tester")
+    tester_code: str | None = None
+    if tester_file and tester_file.is_file():
+        try:
+            tester_code = tester_file.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            tester_code = None
+
     cases_data = read_json(directory / "input_and_output.json")
     cases = cases_data.get("cases") if isinstance(cases_data, dict) else None
     if not isinstance(cases, list) or not 1 <= len(cases) <= MAX_TEST_CASES:
@@ -270,6 +283,8 @@ def get_problem(section_id: str, problem_id: str) -> dict[str, Any]:
         "starter_filename": starter_file.name,
         "solution_code": solution_code,
         "solution_filename": solution_file.name if solution_file else f"{slug}_solution.c",
+        "tester_code": tester_code,
+        "tester_filename": tester_file.name if tester_file else f"{slug}_tester.c",
         "completed": completed,
         "solved_code": solved_code,
         "solved_filename": solved_file.name if solved_file else f"{slug}_solved.c",

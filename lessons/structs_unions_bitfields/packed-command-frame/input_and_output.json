@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "frame: 0x55 0x1 0x12 0x34 0x72 0xaa, valid: 1\n"
+    },
+    {
+      "input": "2",
+      "output": "frame: 0x55 0xa5 0x0 0x0 0xf0 0xaa, valid: 1\n"
+    },
+    {
+      "input": "3",
+      "output": "valid: 0\n"
+    },
+    {
+      "input": "4",
+      "output": "valid: 0\n"
+    },
+    {
+      "input": "5",
+      "output": "valid: 0\n"
     }
   ]
 }

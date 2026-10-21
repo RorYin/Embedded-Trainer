@@ -1,8 +1,28 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1: gpio_set_pin(&reg, 3) on reg=0x0000\n",
+      "output": "0x8\n"
+    },
+    {
+      "input": "2: gpio_set_pin(&reg, 7) on reg=0x0008\n",
+      "output": "0x88\n"
+    },
+    {
+      "input": "3: gpio_clear_pin(&reg, 3) on reg=0x0088\n",
+      "output": "0x80\n"
+    },
+    {
+      "input": "4: gpio_toggle_pin(&reg, 0) on reg=0x0080\n",
+      "output": "0x81\n"
+    },
+    {
+      "input": "5: gpio_read_pin(0x0081, 0)\n",
+      "output": "1\n"
+    },
+    {
+      "input": "6: gpio_read_pin(0x0081, 1)\n",
+      "output": "0\n"
     }
   ]
 }

@@ -31,31 +31,3 @@ SensorData parse_sensor_packet_fixed(const uint8_t *buf)
     (void)buf;
     return d;
 }
-
-int main(void)
-{
-    /* Packet: SensorID=0x1234 (LE), Pressure=101325=0x00018BCD (BE), Flags=0x8001 (BE) */
-    uint8_t packet[8] = {
-        0x34, 0x12,             /* Sensor ID: LE 0x1234 */
-        0x00, 0x01, 0x8B, 0xCD, /* Pressure: BE 101325 */
-        0x80, 0x01              /* Flags: BE 0x8001 */
-    };
-
-    SensorData s = parse_sensor_packet_fixed(packet);
-
-    if (s.sensor_id != 0x1234) {
-        printf("Failed: sensor_id, got 0x%x\n", s.sensor_id);
-        return 1;
-    }
-    if (s.pressure_pa != 101325) {
-        printf("Failed: pressure, got %d\n", (int)s.pressure_pa);
-        return 2;
-    }
-    if (s.status_flags != 0x8001) {
-        printf("Failed: status_flags, got 0x%x\n", s.status_flags);
-        return 3;
-    }
-
-    printf("All tests passed!\n");
-    return 0;
-}

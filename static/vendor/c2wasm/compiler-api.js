@@ -130,12 +130,22 @@ var CompilerAPI = (function () {
     });
 
     // Multi-token typedef struct { ... } Name; -> struct Name { ... }; typedef struct Name Name;
+    var structNames = [];
     s = s.replace(/typedef\s+struct\s*(?:[a-zA-Z0-9_]*)\s*\{([^}]+)\}\s*([a-zA-Z0-9_]+);/g, function(_, body, name) {
+      structNames.push(name);
       return 'struct ' + name + ' {' + body + '};\ntypedef struct ' + name + ' ' + name + ';';
     });
+    for (var si = 0; si < structNames.length; si++) {
+      s = s.replace(new RegExp('\\bsizeof\\s*\\(\\s*' + structNames[si] + '\\s*\\)', 'g'), 'sizeof(struct ' + structNames[si] + ')');
+    }
+    var unionNames = [];
     s = s.replace(/typedef\s+union\s*(?:[a-zA-Z0-9_]*)\s*\{([^}]+)\}\s*([a-zA-Z0-9_]+);/g, function(_, body, name) {
+      unionNames.push(name);
       return 'union ' + name + ' {' + body + '};\ntypedef union ' + name + ' ' + name + ';';
     });
+    for (var ui = 0; ui < unionNames.length; ui++) {
+      s = s.replace(new RegExp('\\bsizeof\\s*\\(\\s*' + unionNames[ui] + '\\s*\\)', 'g'), 'sizeof(union ' + unionNames[ui] + ')');
+    }
 
     // Multi-token pointer casts: (uint8_t*), (unsigned char*) -> (char*); (uint16_t*) -> (short*); (uint32_t*) -> (unsigned*)
     s = s.replace(/\(\s*(?:unsigned\s+char|uint8_t)\s*\*\s*\)/g, '(char*)');
@@ -171,6 +181,12 @@ var CompilerAPI = (function () {
     s = s.replace(/\b1[uU]?\s*<<\s*([0-9]+)\b/g, function(_, shift) {
       return '0x' + (1 << parseInt(shift, 10)).toString(16);
     });
+
+    // Normalize *(ptr + offset) to ptr[offset] for proper byte-indexing in c2wasm
+    s = s.replace(/\*\(\s*([a-zA-Z0-9_]+)\s*\+\s*([0-9]+)\s*\)/g, '$1[$2]');
+
+    // Normalize g_hw_timer_counter[0] to scalar g_hw_timer_counter
+    s = s.replace(/\bg_hw_timer_counter\[0\]\b/g, 'g_hw_timer_counter');
 
     // Normalize printf format strings (%u -> %d, %04u -> %04d) for c2wasm parser
     s = s.replace(/"([^"\\]|\\.)*"/g, function(str) {

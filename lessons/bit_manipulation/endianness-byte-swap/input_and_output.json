@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1: is_little_endian()\n",
+      "output": "1\n"
+    },
+    {
+      "input": "2: swap16(0xAABB)\n",
+      "output": "0xbbaa\n"
+    },
+    {
+      "input": "3: swap16(0x1234)\n",
+      "output": "0x3412\n"
+    },
+    {
+      "input": "4: swap32(0xAABBCCDD)\n",
+      "output": "0xddccbbaa\n"
+    },
+    {
+      "input": "5: swap32(0x12345678)\n",
+      "output": "0x78563412\n"
     }
   ]
 }

@@ -36,17 +36,3 @@ uint32_t read_le32(const uint8_t *buf)
     (void)buf;
     return 0;
 }
-
-int main(void)
-{
-    uint8_t buffer[4] = { 0x12, 0x34, 0x56, 0x78 };
-
-    if (read_be16(buffer) != 0x1234) { printf("Failed: read_be16\n"); return 1; }
-    if (read_be32(buffer) != 0x12345678) { printf("Failed: read_be32\n"); return 2; }
-
-    if (read_le16(buffer) != 0x3412) { printf("Failed: read_le16\n"); return 3; }
-    if (read_le32(buffer) != 0x78563412) { printf("Failed: read_le32\n"); return 4; }
-
-    printf("All tests passed!\n");
-    return 0;
-}

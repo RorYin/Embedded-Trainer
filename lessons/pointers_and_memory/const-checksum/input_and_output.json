@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "sum: 100\n"
+    },
+    {
+      "input": "2",
+      "output": "sum: 1020\n"
+    },
+    {
+      "input": "3",
+      "output": "sum: 0\n"
+    },
+    {
+      "input": "4",
+      "output": "crc: 0x0 0x7 0x15\n"
+    },
+    {
+      "input": "5",
+      "output": "crc: 0x7 0x15\n"
     }
   ]
 }

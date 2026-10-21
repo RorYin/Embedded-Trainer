@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1: can_get_tx_count(0x00AB1234)\n",
+      "output": "0x34\n"
+    },
+    {
+      "input": "2: can_get_rx_count(0x00AB1234)\n",
+      "output": "0x12\n"
+    },
+    {
+      "input": "3: can_get_error_counter(0x00AB1234)\n",
+      "output": "0xab\n"
+    },
+    {
+      "input": "4: can_set_tx_count(0x00AB1234, 0xFF)\n",
+      "output": "0xab12ff\n"
+    },
+    {
+      "input": "5: can_set_tx_count(0x12345678, 0x00)\n",
+      "output": "0x12345600\n"
     }
   ]
 }

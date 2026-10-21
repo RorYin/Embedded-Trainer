@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "sig: 0xaa\n"
+    },
+    {
+      "input": "2",
+      "output": "sig: 0x55\n"
+    },
+    {
+      "input": "3",
+      "output": "sig: 0x5a\n"
+    },
+    {
+      "input": "4",
+      "output": "sig: 0x55aa\n"
+    },
+    {
+      "input": "5",
+      "output": "sig: 0xf05\n"
     }
   ]
 }

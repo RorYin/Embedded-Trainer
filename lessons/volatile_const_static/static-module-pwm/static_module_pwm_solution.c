@@ -21,18 +21,3 @@ uint8_t pwm_get_output(uint32_t current_tick)
 
     return (phase < on_time) ? 1 : 0;
 }
-
-int main(void)
-{
-    pwm_set_duty(50, 1000);
-
-    if (pwm_get_output(0) != 1)   { printf("Failed: tick 0\n"); return 1; }
-    if (pwm_get_output(499) != 1) { printf("Failed: tick 499\n"); return 2; }
-    if (pwm_get_output(500) != 0) { printf("Failed: tick 500\n"); return 3; }
-    if (pwm_get_output(999) != 0) { printf("Failed: tick 999\n"); return 4; }
-
-    if (pwm_get_output(1000) != 1) { printf("Failed: tick 1000\n"); return 5; }
-
-    printf("All tests passed!\n");
-    return 0;
-}

@@ -591,6 +591,8 @@ async function selectProblem(section, problemId, button) {
       solutionFilename: problem.solution_filename || `${defaultSlug}_solution.c`,
       solvedCode: typeof problem.solved_code === "string" ? problem.solved_code : null,
       solvedFilename: problem.solved_filename || `${defaultSlug}_solved.c`,
+      testerCode: typeof problem.tester_code === "string" ? problem.tester_code : null,
+      testerFilename: problem.tester_filename || `${defaultSlug}_tester.c`,
       cases: Array.isArray(problem.cases) ? problem.cases : [],
       activeSource: "template",
     };
@@ -763,9 +765,13 @@ runButton.addEventListener("click", async () => {
   const resultList = document.getElementById("result-list");
   resultList.replaceChildren();
 
+  const userSource = exercise.testerCode
+    ? `${submittedSource}\n\n/* --- Test Harness --- */\n${exercise.testerCode}`
+    : submittedSource;
+
   let wasmBytes;
   try {
-    wasmBytes = await CompilerAPI.compileBinary(submittedSource);
+    wasmBytes = await CompilerAPI.compileBinary(userSource);
   } catch (compileErr) {
     const rawErrMsg = compileErr.message || String(compileErr);
     const formattedError = formatCompilerError(rawErrMsg, submittedSource);
@@ -778,6 +784,17 @@ runButton.addEventListener("click", async () => {
     return;
   }
 
+  // Compile reference solution with tester for differential output verification
+  let solutionWasm = null;
+  if (exercise.solutionCode && exercise.testerCode) {
+    try {
+      const solutionSource = `${exercise.solutionCode}\n\n/* --- Test Harness --- */\n${exercise.testerCode}`;
+      solutionWasm = await CompilerAPI.compileBinary(solutionSource);
+    } catch (solErr) {
+      console.warn("Could not compile reference solution:", solErr);
+    }
+  }
+
   runButton.textContent = "Running tests...";
   document.getElementById("result-summary").textContent = "Running test cases in WebAssembly...";
 
@@ -787,14 +804,22 @@ runButton.addEventListener("click", async () => {
 
   const results = [];
   for (const testCase of cases) {
+    let expectedOutput = testCase.expected;
+    if (solutionWasm) {
+      const solExec = await runCaseWithTimeout(solutionWasm, testCase.input, 2000);
+      if (solExec.exitCode === 0 && !solExec.error) {
+        expectedOutput = solExec.stdout;
+      }
+    }
+
     const exec = await runCaseWithTimeout(wasmBytes, testCase.input, 2000);
     const passed = (exec.exitCode === 0 && !exec.error) &&
-      (normalizeOutput(exec.stdout) === normalizeOutput(testCase.expected));
+      (normalizeOutput(exec.stdout) === normalizeOutput(expectedOutput));
     const testResult = {
       number: testCase.number,
       passed: passed,
       input: testCase.input,
-      expected: testCase.expected,
+      expected: expectedOutput,
       actual: exec.stdout || "",
       error: exec.error || exec.stderr || "",
       exit_code: exec.exitCode,

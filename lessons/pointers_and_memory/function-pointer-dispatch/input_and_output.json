@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "res: 0, btn: 5, tmr: 0, uart: 0\n"
+    },
+    {
+      "input": "2",
+      "output": "res: 0, btn: 0, tmr: 10, uart: 0\n"
+    },
+    {
+      "input": "3",
+      "output": "res: 0, btn: 0, tmr: 0, uart: 1\n"
+    },
+    {
+      "input": "4",
+      "output": "res: -1, btn: 0, tmr: 0, uart: 0\n"
+    },
+    {
+      "input": "5",
+      "output": "btn: 10, tmr: 4, uart: 6\n"
     }
   ]
 }
