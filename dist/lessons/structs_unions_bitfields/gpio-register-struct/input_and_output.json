@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "moder: 0x400\n"
+    },
+    {
+      "input": "2",
+      "output": "moder: 0xc00\n"
+    },
+    {
+      "input": "3",
+      "output": "bsrr: 0x8\n"
+    },
+    {
+      "input": "4",
+      "output": "bsrr: 0x80000\n"
+    },
+    {
+      "input": "5",
+      "output": "pin2: 1 pin0: 0\n"
     }
   ]
 }

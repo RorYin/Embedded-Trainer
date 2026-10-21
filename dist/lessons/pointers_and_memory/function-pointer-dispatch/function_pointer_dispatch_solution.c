@@ -43,26 +43,3 @@ int dispatch_event(uint8_t event_id, uint32_t data)
     }
     return -1;
 }
-
-int main(void)
-{
-    init_dispatch_table();
-
-    if (dispatch_event(0x01, 5) != 0) { printf("Failed dispatch 0x01\n"); return 1; }
-    if (g_btn_count != 5) { printf("Failed button count\n"); return 2; }
-
-    if (dispatch_event(0x02, 10) != 0) { printf("Failed dispatch 0x02\n"); return 3; }
-    if (g_tmr_count != 10) { printf("Failed timer count\n"); return 4; }
-
-    if (dispatch_event(0x03, 1) != 0) { printf("Failed dispatch 0x03\n"); return 5; }
-    if (g_uart_count != 1) { printf("Failed uart count\n"); return 6; }
-
-    if (dispatch_event(0x99, 100) != -1) { printf("Failed unknown event check\n"); return 7; }
-
-    free(dispatch_table[0]);
-    free(dispatch_table[1]);
-    free(dispatch_table[2]);
-
-    printf("All tests passed!\n");
-    return 0;
-}

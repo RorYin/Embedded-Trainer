@@ -1,8 +1,20 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "id: 0x1234 press: 101325 flags: 0x8001\n"
+    },
+    {
+      "input": "2",
+      "output": "id: 0x0 press: 0 flags: 0x0\n"
+    },
+    {
+      "input": "3",
+      "output": "id: 0xffff press: 1000000 flags: 0x7fff\n"
+    },
+    {
+      "input": "4",
+      "output": "id: 0x8001 press: 1000 flags: 0x5\n"
     }
   ]
 }

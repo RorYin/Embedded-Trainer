@@ -49,33 +49,3 @@ uint8_t gpio_read_input(GPIO_TypeDef *gpio, uint8_t pin)
     (void)gpio; (void)pin;
     return 0;
 }
-
-int main(void)
-{
-    GPIO_TypeDef *port = (GPIO_TypeDef*)malloc(sizeof(GPIO_TypeDef));
-    port->MODER = 0;
-    port->BSRR = 0;
-    port->IDR = 0;
-
-    gpio_set_mode(port, 5, GPIO_MODE_OUTPUT);
-    if ((port->MODER & (0x3 << 10)) != (0x1 << 10)) { printf("Failed: set mode 5\n"); return 1; }
-
-    gpio_set_mode(port, 5, GPIO_MODE_ANALOG);
-    if ((port->MODER & (0x3 << 10)) != (0x3 << 10)) { printf("Failed: update mode 5\n"); return 2; }
-
-    /* Atomic set */
-    gpio_write_pin_atomic(port, 3, 1);
-    if (port->BSRR != (1 << 3)) { printf("Failed: atomic set 3\n"); return 3; }
-
-    /* Atomic reset */
-    gpio_write_pin_atomic(port, 3, 0);
-    if (port->BSRR != (1 << (3 + 16))) { printf("Failed: atomic reset 3\n"); return 4; }
-
-    port->IDR = 0x0004;
-    if (gpio_read_input(port, 2) != 1) { printf("Failed: read input pin 2\n"); return 5; }
-    if (gpio_read_input(port, 0) != 0) { printf("Failed: read input pin 0\n"); return 6; }
-
-    free(port);
-    printf("All tests passed!\n");
-    return 0;
-}

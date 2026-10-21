@@ -8,3 +8,4 @@ static/vendor/monaco/
 lessons/progress.json
 dist/lessons/progress.json
 compiler/
+*.spec

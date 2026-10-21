@@ -27,13 +27,3 @@ uint32_t bswap32(uint32_t x)
     (void)x;
     return 0;
 }
-
-int main(void)
-{
-    if (system_is_little_endian() != 1) { printf("Failed: endianness check\n"); return 1; }
-    if (bswap16(0x1234) != 0x3412) { printf("Failed: bswap16\n"); return 2; }
-    if (bswap32(0x12345678) != 0x78563412) { printf("Failed: bswap32\n"); return 3; }
-
-    printf("All tests passed!\n");
-    return 0;
-}

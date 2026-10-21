@@ -29,21 +29,3 @@ uint32_t reverse_bits(uint32_t x)
     }
     return res;
 }
-
-int main(void)
-{
-    if (count_set_bits(0xB5) != 5) { printf("Failed: count_set_bits(0xB5)\n"); return 1; }
-    if (count_set_bits(0) != 0) { printf("Failed: count_set_bits(0)\n"); return 2; }
-    if (count_set_bits(0xFFFFFFFF) != 32) { printf("Failed: count_set_bits(all)\n"); return 3; }
-
-    if (find_highest_set_bit(0x0A) != 3) { printf("Failed: find_highest(10)\n"); return 4; }
-    if (find_highest_set_bit(0) != -1) { printf("Failed: find_highest(0)\n"); return 5; }
-    if (find_highest_set_bit(1) != 0) { printf("Failed: find_highest(1)\n"); return 6; }
-    if (find_highest_set_bit(0x80000000) != 31) { printf("Failed: find_highest(msb)\n"); return 7; }
-
-    if (reverse_bits(0x80000000) != 0x00000001) { printf("Failed: reverse msb\n"); return 8; }
-    if (reverse_bits(0x00000001) != 0x80000000) { printf("Failed: reverse lsb\n"); return 9; }
-
-    printf("All tests passed!\n");
-    return 0;
-}

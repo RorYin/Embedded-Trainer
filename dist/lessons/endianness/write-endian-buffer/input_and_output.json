@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "be16: 0xab 0xcd\n"
+    },
+    {
+      "input": "2",
+      "output": "be32: 0x11 0x22 0x33 0x44\n"
+    },
+    {
+      "input": "3",
+      "output": "le16: 0xcd 0xab\n"
+    },
+    {
+      "input": "4",
+      "output": "be16: 0x0 0x1 le16: 0x1 0x0\n"
+    },
+    {
+      "input": "5",
+      "output": "be32: 0xaa 0xbb 0xcc 0xdd\n"
     }
   ]
 }

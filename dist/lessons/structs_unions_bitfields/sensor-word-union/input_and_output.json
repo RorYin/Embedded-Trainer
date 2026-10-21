@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "temp: 254 hum: 605\n"
+    },
+    {
+      "input": "2",
+      "output": "temp: -100 hum: 500\n"
+    },
+    {
+      "input": "3",
+      "output": "temp: 0 hum: 0\n"
+    },
+    {
+      "input": "4",
+      "output": "temp: 32767 hum: 65535\n"
+    },
+    {
+      "input": "5",
+      "output": "temp: -32768 hum: 1000\n"
     }
   ]
 }

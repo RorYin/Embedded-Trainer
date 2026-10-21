@@ -33,18 +33,3 @@ uint8_t get_control_speed(uint32_t reg)
     (void)reg;
     return 0;
 }
-
-int main(void)
-{
-    uint32_t val = build_control_reg(1, 0, 1, 1);
-    if (val != 0x00000105) {
-        printf("Failed: expected 0x00000105, got 0x%x\n", val);
-        return 1;
-    }
-
-    if (get_control_speed(val) != 1) { printf("Failed: extract speed 1\n"); return 2; }
-    if (get_control_speed(0x00000300) != 3) { printf("Failed: extract speed 3\n"); return 3; }
-
-    printf("All tests passed!\n");
-    return 0;
-}

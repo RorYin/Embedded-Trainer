@@ -1,8 +1,20 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "state: 0\n"
+    },
+    {
+      "input": "2",
+      "output": "states: 0 1 1 0\n"
+    },
+    {
+      "input": "3",
+      "output": "states: 1 0\n"
+    },
+    {
+      "input": "4",
+      "output": "states: 0 0 0\n"
     }
   ]
 }

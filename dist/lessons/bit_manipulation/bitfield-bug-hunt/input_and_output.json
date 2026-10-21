@@ -1,8 +1,20 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1: set_field_fixed(0xF00F, 0x5)\n",
+      "output": "0xf05f\n"
+    },
+    {
+      "input": "2: set_field_fixed(0x12F4, 0x0)\n",
+      "output": "0x1204\n"
+    },
+    {
+      "input": "3: set_field_fixed(0x0000, 0xFF)\n",
+      "output": "0xf0\n"
+    },
+    {
+      "input": "4: set_field_fixed(0xAAAA, 0x5)\n",
+      "output": "0xaa5a\n"
     }
   ]
 }

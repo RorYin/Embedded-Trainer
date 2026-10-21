@@ -1,8 +1,20 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1: periph_init -> CR_EN set\n",
+      "output": "1\n"
+    },
+    {
+      "input": "2: periph_wait_ready with BUSY flag -> timeout\n",
+      "output": "-1\n"
+    },
+    {
+      "input": "3: periph_wait_ready when not BUSY -> success\n",
+      "output": "0\n"
+    },
+    {
+      "input": "4: periph_write(dev, 0xCAFEBABE) -> DR\n",
+      "output": "0xcafebabe\n"
     }
   ]
 }

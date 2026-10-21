@@ -1,8 +1,28 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1",
+      "output": "dac: 0\n"
+    },
+    {
+      "input": "2",
+      "output": "dac: 128\n"
+    },
+    {
+      "input": "3",
+      "output": "dac: 255\n"
+    },
+    {
+      "input": "4",
+      "output": "dac: 255\n"
+    },
+    {
+      "input": "5",
+      "output": "dac: 128\n"
+    },
+    {
+      "input": "6",
+      "output": "dac: 51\n"
     }
   ]
 }

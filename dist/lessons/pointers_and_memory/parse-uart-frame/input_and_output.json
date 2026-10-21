@@ -1,8 +1,24 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1: parse_frame(frame) -> SOF\n",
+      "output": "0xaa\n"
+    },
+    {
+      "input": "2: parse_frame(frame) -> CMD\n",
+      "output": "0x5\n"
+    },
+    {
+      "input": "3: parse_frame(frame) -> Length\n",
+      "output": "4\n"
+    },
+    {
+      "input": "4: parse_frame(frame) -> Payload\n",
+      "output": "0x12345678\n"
+    },
+    {
+      "input": "5: parse_frame(frame) -> Checksum\n",
+      "output": "0x55\n"
     }
   ]
 }

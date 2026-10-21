@@ -1,8 +1,20 @@
 {
   "cases": [
     {
-      "input": "",
-      "output": "All tests passed!\n"
+      "input": "1: usart_enable on CR1=0\n",
+      "output": "1\n"
+    },
+    {
+      "input": "2: usart_configure_8n1 on CR1=0xFFFF\n",
+      "output": "0x0\n"
+    },
+    {
+      "input": "3: usart_configure_8e1 on CR1=0xFFFF\n",
+      "output": "1 1\n"
+    },
+    {
+      "input": "4: usart_configure_9o1 on CR1=0\n",
+      "output": "1\n"
     }
   ]
 }
